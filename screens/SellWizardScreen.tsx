@@ -76,7 +76,6 @@ const SellWizardScreen: React.FC<SellWizardScreenProps> = ({ onClose, onPublish 
   const [draggedIdx, setDraggedIdx] = useState<number | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  // States for progressive image loading and feedback
   const [loadedPhotos, setLoadedPhotos] = useState<Set<string>>(new Set());
   const [uploadProgress, setUploadProgress] = useState<Record<string, number>>({});
   const [enhancedPhotos, setEnhancedPhotos] = useState<Set<string>>(new Set());
@@ -148,7 +147,6 @@ const SellWizardScreen: React.FC<SellWizardScreenProps> = ({ onClose, onPublish 
         photos: [...prev.photos, ...newPhotoUrls]
       }));
 
-      // Simulate upload progress for each new photo
       newPhotoUrls.forEach(url => {
         let progress = 0;
         setUploadProgress(prev => ({ ...prev, [url]: 0 }));
@@ -330,14 +328,13 @@ const SellWizardScreen: React.FC<SellWizardScreenProps> = ({ onClose, onPublish 
 
   const renderStep = () => {
     switch (step) {
-      case 1: // Photos
+      case 1:
         return (
           <div className="space-y-6 animate-in fade-in slide-in-from-right-4 duration-300">
             <div className="px-6">
               <h2 className="text-2xl font-bold text-gray-900">Add some photos</h2>
               <p className="text-sm text-gray-500 mt-1 font-medium">Bright, clear photos help items sell faster.</p>
             </div>
-
             <input 
               type="file" 
               ref={fileInputRef}
@@ -346,7 +343,6 @@ const SellWizardScreen: React.FC<SellWizardScreenProps> = ({ onClose, onPublish 
               accept="image/*" 
               onChange={handleFileChange}
             />
-
             <div className="px-6">
               <button 
                 onClick={triggerFileUpload}
@@ -361,7 +357,6 @@ const SellWizardScreen: React.FC<SellWizardScreenProps> = ({ onClose, onPublish 
                 </div>
               </button>
             </div>
-
             <div className="px-6 space-y-4">
               <div className="flex items-center justify-between">
                 <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">Your Photos ({listing.photos.length}/6)</p>
@@ -372,7 +367,6 @@ const SellWizardScreen: React.FC<SellWizardScreenProps> = ({ onClose, onPublish 
                   </p>
                 )}
               </div>
-              
               <div className="grid grid-cols-3 gap-3">
                 {listing.photos.map((photo, idx) => {
                   const isLoaded = loadedPhotos.has(photo);
@@ -380,7 +374,6 @@ const SellWizardScreen: React.FC<SellWizardScreenProps> = ({ onClose, onPublish 
                   const isUploading = progress > 0 && progress <= 100 && uploadProgress.hasOwnProperty(photo);
                   const isEnhanced = enhancedPhotos.has(photo);
                   const isJustEnhanced = justEnhanced === idx;
-
                   return (
                     <div 
                       key={photo}
@@ -390,19 +383,15 @@ const SellWizardScreen: React.FC<SellWizardScreenProps> = ({ onClose, onPublish 
                       onDragEnd={handleDragEnd}
                       className={`aspect-square rounded-[24px] overflow-hidden bg-gray-50 border border-gray-100 relative group cursor-grab active:cursor-grabbing transition-all duration-300 ${draggedIdx === idx ? 'opacity-40 scale-95 shadow-inner' : 'opacity-100 scale-100 shadow-sm'}`}
                     >
-                      {/* Progressive Loading Shimmer */}
                       {!isLoaded && (
                         <div className="absolute inset-0 bg-gradient-to-r from-gray-50 via-gray-100 to-gray-50 animate-shimmer" style={{ backgroundSize: '200% 100%' }} />
                       )}
-
                       <img 
                         src={photo} 
                         onLoad={() => onImageLoad(photo)}
                         className={`w-full h-full object-cover transition-opacity duration-500 ${isLoaded ? 'opacity-100' : 'opacity-0'} ${isUploading ? 'blur-[4px] scale-110' : ''}`} 
                         alt={`Preview ${idx + 1}`} 
                       />
-                      
-                      {/* Upload Progress Overlay */}
                       {isUploading && (
                         <div className="absolute inset-0 bg-black/60 backdrop-blur-[2px] flex flex-col items-center justify-center p-4 gap-3 z-30 animate-in fade-in duration-300">
                            {progress < 100 ? (
@@ -429,16 +418,12 @@ const SellWizardScreen: React.FC<SellWizardScreenProps> = ({ onClose, onPublish 
                            )}
                         </div>
                       )}
-
-                      {/* AI Enhanced Badge */}
                       {isEnhanced && !isUploading && (
                         <div className="absolute top-2 right-2 flex items-center gap-1 bg-gradient-to-r from-amber-400 to-orange-500 text-white text-[7px] font-black px-2 py-1 rounded-lg shadow-lg border border-white/20 animate-in zoom-in-75 z-20 shadow-orange-500/20">
                            <Sparkles size={8} fill="currentColor" />
                            <span className="uppercase tracking-widest">AI READY</span>
                         </div>
                       )}
-
-                      {/* Success Animation for AI Enhancement */}
                       {isJustEnhanced && (
                         <div className="absolute inset-0 z-40 flex items-center justify-center pointer-events-none overflow-hidden">
                             <div className="absolute inset-0 bg-[#007d34]/20 animate-out fade-out duration-1000 fill-mode-forwards" />
@@ -447,8 +432,6 @@ const SellWizardScreen: React.FC<SellWizardScreenProps> = ({ onClose, onPublish 
                             </div>
                         </div>
                       )}
-
-                      {/* Action Overlays (Hidden during upload) */}
                       {isLoaded && !isUploading && (
                         <div className="absolute inset-x-2 bottom-2 flex justify-between gap-1.5 opacity-100 sm:opacity-0 group-hover:opacity-100 transition-opacity z-20">
                           <button 
@@ -472,15 +455,11 @@ const SellWizardScreen: React.FC<SellWizardScreenProps> = ({ onClose, onPublish 
                           </button>
                         </div>
                       )}
-
-                      {/* Labels */}
                       {isLoaded && idx === 0 && (
                         <div className="absolute top-2 left-2 bg-[#007d34] text-white text-[8px] font-black uppercase tracking-widest px-2.5 py-1.5 rounded-xl shadow-lg border border-white/20 animate-in zoom-in-75 z-10">
                           Main
                         </div>
                       )}
-
-                      {/* AI Processing Overlay */}
                       {enhancingIdx === idx && (
                         <div className="absolute inset-0 bg-[#007d34]/70 backdrop-blur-xl flex flex-col items-center justify-center text-white p-4 z-40 animate-in fade-in duration-300">
                           <div className="relative mb-4">
@@ -497,8 +476,6 @@ const SellWizardScreen: React.FC<SellWizardScreenProps> = ({ onClose, onPublish 
                           </div>
                         </div>
                       )}
-
-                      {/* Fallback for Processing */}
                       {!isLoaded && !isUploading && (
                         <div className="absolute inset-0 flex items-center justify-center">
                           <div className="flex flex-col items-center gap-2">
@@ -507,12 +484,10 @@ const SellWizardScreen: React.FC<SellWizardScreenProps> = ({ onClose, onPublish 
                           </div>
                         </div>
                       )}
-
                       <div className="absolute inset-0 bg-black/5 group-hover:bg-transparent transition-colors pointer-events-none" />
                     </div>
                   );
                 })}
-                
                 {Array.from({ length: Math.max(0, 6 - listing.photos.length) }).map((_, i) => (
                   <button 
                     key={`empty-${i}`}
@@ -531,7 +506,6 @@ const SellWizardScreen: React.FC<SellWizardScreenProps> = ({ onClose, onPublish 
                 ))}
               </div>
             </div>
-
             <div className="px-6">
               <div className="bg-[#e6f2eb] p-6 rounded-[32px] flex gap-5 border border-[#007d34]/10 shadow-sm relative overflow-hidden group">
                 <div className="absolute top-[-20%] right-[-5%] w-24 h-24 bg-white/20 rounded-full blur-2xl group-hover:scale-150 transition-transform duration-700" />
@@ -549,7 +523,7 @@ const SellWizardScreen: React.FC<SellWizardScreenProps> = ({ onClose, onPublish 
             </div>
           </div>
         );
-      case 2: // Details
+      case 2:
         return (
           <div className="space-y-8 px-6 animate-in fade-in slide-in-from-right-4 duration-300">
             <div>
@@ -566,7 +540,6 @@ const SellWizardScreen: React.FC<SellWizardScreenProps> = ({ onClose, onPublish 
                   onChange={(e) => setListing({...listing, name: e.target.value})}
                 />
               </div>
-
               <div className="space-y-2">
                 <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">Category</label>
                 <button 
@@ -586,7 +559,6 @@ const SellWizardScreen: React.FC<SellWizardScreenProps> = ({ onClose, onPublish 
                   <ChevronRight size={18} className="text-gray-300 group-hover:translate-x-1 transition-transform" />
                 </button>
               </div>
-
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">Brand</label>
@@ -608,7 +580,6 @@ const SellWizardScreen: React.FC<SellWizardScreenProps> = ({ onClose, onPublish 
                   />
                 </div>
               </div>
-
               <div className="space-y-3">
                 <div className="flex items-center justify-between ml-1">
                   <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Age Range</label>
@@ -630,7 +601,6 @@ const SellWizardScreen: React.FC<SellWizardScreenProps> = ({ onClose, onPublish 
                   ))}
                 </div>
               </div>
-
               <div className="space-y-3 pt-2">
                 <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">Condition</label>
                 <div className="flex gap-2 overflow-x-auto hide-scrollbar pb-1">
@@ -660,7 +630,7 @@ const SellWizardScreen: React.FC<SellWizardScreenProps> = ({ onClose, onPublish 
             </div>
           </div>
         );
-      case 3: // AI Pricing
+      case 3:
         return (
           <div className="space-y-6 px-6 animate-in fade-in slide-in-from-right-4 duration-300">
             <div>
@@ -683,7 +653,6 @@ const SellWizardScreen: React.FC<SellWizardScreenProps> = ({ onClose, onPublish 
                 <div className={`bg-gradient-to-br transition-all duration-500 ${validation?.type === 'error' ? 'from-red-600 to-red-800' : 'from-[#007d34] to-[#015e27]'} rounded-[40px] p-10 text-white text-center relative overflow-hidden shadow-xl shadow-green-900/20`}>
                    <div className="relative z-10">
                     <p className="text-[10px] uppercase font-black tracking-widest opacity-70 mb-5">Your Listing Price</p>
-                    
                     <div className="flex items-center justify-center gap-3 group">
                         <span className="text-3xl font-black opacity-60">SGD</span>
                         <input 
@@ -695,13 +664,11 @@ const SellWizardScreen: React.FC<SellWizardScreenProps> = ({ onClose, onPublish 
                         />
                         <Edit3 size={24} className="opacity-0 group-hover:opacity-40 transition-opacity" />
                     </div>
-
                     <div className="mt-8 flex flex-col items-center gap-3">
                         <div className="inline-flex items-center gap-2 bg-white/20 px-4 py-1.5 rounded-full text-[10px] font-black uppercase tracking-wider">
                             <Zap size={12} fill="white" className="animate-pulse" />
                             <span>AI Suggested: SGD {aiResult?.suggestedPrice}</span>
                         </div>
-                        
                         <div className="text-[10px] font-bold text-white/60 flex items-center gap-1.5">
                             <CheckCircle2 size={12} />
                             Recommended Range: SGD {Math.round(aiResult?.suggestedPrice * 0.8)} - {Math.round(aiResult?.suggestedPrice * 1.2)}
@@ -711,7 +678,6 @@ const SellWizardScreen: React.FC<SellWizardScreenProps> = ({ onClose, onPublish 
                    <div className="absolute top-[-40%] right-[-20%] w-64 h-64 bg-white/10 rounded-full blur-3xl" />
                    <div className="absolute bottom-[-10%] left-[-10%] w-32 h-32 bg-[#00ff6a]/10 rounded-full blur-2xl" />
                 </div>
-
                 {validation && (
                   <div className={`flex items-start gap-4 p-5 rounded-[28px] border animate-in slide-in-from-top-2 duration-300 ${validation.type === 'error' ? 'bg-red-50 border-red-100 text-red-700' : 'bg-orange-50 border-orange-100 text-orange-700'}`}>
                     <div className={`p-2 rounded-xl bg-white shadow-sm shrink-0 ${validation.type === 'error' ? 'text-red-500' : 'text-orange-500'}`}>
@@ -723,7 +689,6 @@ const SellWizardScreen: React.FC<SellWizardScreenProps> = ({ onClose, onPublish 
                     </div>
                   </div>
                 )}
-
                 <div className="space-y-4">
                   <div className="bg-white p-6 rounded-[28px] border border-gray-100 shadow-sm">
                     <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-3">AI Intelligence Report</p>
@@ -746,16 +711,14 @@ const SellWizardScreen: React.FC<SellWizardScreenProps> = ({ onClose, onPublish 
             )}
           </div>
         );
-      case 4: // Cleaning Process
+      case 4:
         return (
           <div className="space-y-6 px-6 animate-in fade-in slide-in-from-right-4 duration-300">
             <div>
               <h2 className="text-2xl font-bold text-gray-900">Cleaning & Prep</h2>
               <p className="text-sm text-gray-500 mt-1 font-medium">Spotless items get 5-star reviews and sell faster.</p>
             </div>
-
             <div className="space-y-4">
-               {/* Option 1: DIY */}
                <button
                   onClick={() => setCleaningService(false)}
                   className={`w-full flex items-start gap-4 p-5 rounded-[28px] border-2 transition-all text-left group ${!cleaningService ? 'border-[#007d34] bg-[#e6f2eb]' : 'border-gray-100 bg-white hover:border-gray-200'}`}
@@ -768,8 +731,6 @@ const SellWizardScreen: React.FC<SellWizardScreenProps> = ({ onClose, onPublish 
                      <p className="text-[11px] font-medium text-gray-500 mt-1 leading-relaxed">I will ensure the item is washed, sanitized, and fully prepped for the next family.</p>
                   </div>
                </button>
-
-               {/* Option 2: Kidora Refresh */}
                <button
                   onClick={() => setCleaningService(true)}
                   className={`w-full flex items-start gap-4 p-5 rounded-[28px] border-2 transition-all text-left overflow-hidden relative group ${cleaningService ? 'border-blue-500 bg-blue-50' : 'border-gray-100 bg-white hover:border-gray-200'}`}
@@ -787,8 +748,6 @@ const SellWizardScreen: React.FC<SellWizardScreenProps> = ({ onClose, onPublish 
                   </div>
                </button>
             </div>
-
-            {/* Contextual Info Box */}
             <div className={`p-6 rounded-[28px] border transition-all duration-300 ${cleaningService ? 'bg-white border-blue-100 shadow-xl shadow-blue-900/5' : 'bg-gray-50 border-gray-100'}`}>
                 {cleaningService ? (
                     <div className="space-y-4">
@@ -824,7 +783,7 @@ const SellWizardScreen: React.FC<SellWizardScreenProps> = ({ onClose, onPublish 
             </div>
           </div>
         );
-      case 5: // Summary
+      case 5:
         return (
           <div className="space-y-6 px-6 animate-in fade-in slide-in-from-right-4 duration-300">
             <div>
@@ -860,8 +819,6 @@ const SellWizardScreen: React.FC<SellWizardScreenProps> = ({ onClose, onPublish 
                     <span className="bg-gray-50 px-3 py-1.5 rounded-xl text-[10px] font-black uppercase tracking-widest text-gray-500 border border-gray-100">{listing.age}</span>
                     <span className="bg-green-50 px-3 py-1.5 rounded-xl text-[10px] font-black uppercase tracking-widest text-[#007d34] border border-green-100">~4.2kg CO2 saved</span>
                  </div>
-
-                 {/* Financial Breakdown */}
                  <div className="pt-4 border-t border-gray-100 space-y-2.5">
                     <div className="flex justify-between text-xs font-bold text-gray-500">
                        <span>Selling Price</span>
@@ -903,7 +860,6 @@ const SellWizardScreen: React.FC<SellWizardScreenProps> = ({ onClose, onPublish 
           <ChevronLeft size={20} />
         </button>
         <h1 className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Step {step} of {totalSteps}</h1>
-        
         <button 
           onClick={saveDraft}
           disabled={saveStatus !== 'idle'}
@@ -931,41 +887,48 @@ const SellWizardScreen: React.FC<SellWizardScreenProps> = ({ onClose, onPublish 
       {isCategoryModalOpen && (
         <div className="fixed inset-0 z-[100] flex items-end justify-center px-4 pb-4 animate-in fade-in duration-300">
           <div className="absolute inset-0 bg-gray-900/40 backdrop-blur-sm" onClick={() => setIsCategoryModalOpen(false)} />
-          <div className="relative w-full max-w-md bg-white rounded-[40px] p-8 shadow-2xl animate-in slide-in-from-bottom-10 duration-500 flex flex-col max-h-[85vh]">
-            <div className="w-12 h-1.5 bg-gray-100 rounded-full mx-auto mb-6 shrink-0" />
-            
-            <div className="flex items-center justify-between mb-2">
-              <h2 className="text-2xl font-black text-gray-900">Category</h2>
-              <button onClick={() => setIsCategoryModalOpen(false)} className="p-2 text-gray-400 hover:text-gray-900">
-                <X size={20} />
-              </button>
-            </div>
-            <p className="text-sm text-gray-500 mb-6 font-medium">Where does your item belong?</p>
-
-            <div className="relative mb-6 shrink-0">
-              <div className="absolute inset-y-0 left-4 flex items-center text-gray-400 pointer-events-none">
-                <Search size={18} />
-              </div>
-              <input 
-                type="text"
-                placeholder="Search categories (e.g. prams, toys)..."
-                className="w-full bg-gray-50 border border-gray-100 rounded-[24px] pl-11 pr-11 py-4 text-sm font-semibold focus:bg-white focus:border-[#007d34] outline-none transition-all shadow-inner"
-                value={categorySearch}
-                onChange={(e) => setCategorySearch(e.target.value)}
-              />
-              {categorySearch && (
-                <button 
-                  onClick={() => setCategorySearch('')}
-                  className="absolute inset-y-0 right-4 flex items-center text-gray-400 hover:text-gray-600 transition-colors"
-                >
-                  <X size={16} />
+          <div className="relative w-full max-w-md bg-white rounded-[40px] shadow-2xl animate-in slide-in-from-bottom-10 duration-500 flex flex-col max-h-[85vh] overflow-hidden">
+            <div className="sticky top-0 bg-white px-8 pt-8 pb-4 z-10 border-b border-gray-50">
+              <div className="w-12 h-1.5 bg-gray-100 rounded-full mx-auto mb-6" />
+              <div className="flex items-center justify-between mb-2">
+                <h2 className="text-2xl font-black text-gray-900">Category</h2>
+                <button onClick={() => setIsCategoryModalOpen(false)} className="p-2 text-gray-400 hover:text-gray-900">
+                  <X size={20} />
                 </button>
-              )}
+              </div>
+              <p className="text-sm text-gray-500 mb-6 font-medium">Where does your item belong?</p>
+              <div className="relative">
+                <div className="absolute inset-y-0 left-4 flex items-center text-gray-400 pointer-events-none">
+                  <Search size={18} />
+                </div>
+                <input 
+                  type="text"
+                  placeholder="Search categories (e.g. prams, toys)..."
+                  className="w-full bg-gray-50 border border-gray-100 rounded-[24px] pl-11 pr-11 py-4 text-sm font-semibold focus:bg-white focus:border-[#007d34] focus:ring-4 focus:ring-green-50 outline-none transition-all shadow-inner"
+                  value={categorySearch}
+                  onChange={(e) => setCategorySearch(e.target.value)}
+                  autoFocus
+                />
+                {categorySearch && (
+                  <button 
+                    onClick={() => setCategorySearch('')}
+                    className="absolute inset-y-0 right-4 flex items-center text-gray-400 hover:text-gray-600 transition-colors"
+                  >
+                    <X size={16} />
+                  </button>
+                )}
+              </div>
             </div>
 
-            <div className="overflow-y-auto hide-scrollbar space-y-4 pb-6">
+            <div className="overflow-y-auto hide-scrollbar p-8 pt-4 space-y-4">
               {filteredCategories.length > 0 ? (
                 <div className="space-y-3">
+                  {!categorySearch && (
+                    <div className="flex items-center gap-2 mb-2 px-1">
+                      <Flame size={12} className="text-orange-500" fill="currentColor" />
+                      <span className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Trending Categories</span>
+                    </div>
+                  )}
                   {filteredCategories.map((cat) => (
                     <button 
                       key={cat.id}
