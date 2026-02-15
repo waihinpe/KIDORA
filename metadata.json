@@ -1,0 +1,7 @@
+{
+  "name": "KIDORA",
+  "description": "A premium circular marketplace for kids' gear in Southeast Asia, promoting sustainability and smart savings for modern mothers.",
+  "requestFramePermissions": [
+    "geolocation"
+  ]
+}
