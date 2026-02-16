@@ -1,8 +1,9 @@
 
-import React from 'react';
-import { Search, ShoppingBag, PlusCircle, ShieldCheck, Heart, Leaf } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { Search, ShoppingBag, PlusCircle, ShieldCheck, Heart, Leaf, ImageOff, RefreshCw, Loader2, Sparkles, Globe } from 'lucide-react';
 import { MOCK_PRODUCTS, PRIMARY_COLOR } from '../constants';
 import { Product, User } from '../types';
+import { repairBrokenImage } from '../services/geminiService';
 
 interface HomeScreenProps {
   user: User | null;
@@ -15,17 +16,14 @@ interface HomeScreenProps {
 export const KidoraLogo = ({ size = 40, showText = false, className = "" }: { size?: number, showText?: boolean, className?: string }) => (
   <div className={`flex flex-col items-center justify-center ${className}`}>
     <svg width={size} height={size} viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
-      {/* Hand 1: Orange (Top) */}
       <g transform="rotate(0 50 50)">
         <path d="M55 25C65 25 75 35 75 45" stroke="#f58220" strokeWidth="8" strokeLinecap="round" />
         <path d="M55 25C50 25 45 30 43 35M47 32C42 32 37 37 35 42M51 28C46 28 41 33 39 38M59 28C59 23 54 18 49 18" stroke="#f58220" strokeWidth="4" strokeLinecap="round" />
       </g>
-      {/* Hand 2: Blue (Bottom Right) */}
       <g transform="rotate(120 50 50)">
         <path d="M55 25C65 25 75 35 75 45" stroke="#00aeef" strokeWidth="8" strokeLinecap="round" />
         <path d="M55 25C50 25 45 30 43 35M47 32C42 32 37 37 35 42M51 28C46 28 41 33 39 38M59 28C59 23 54 18 49 18" stroke="#00aeef" strokeWidth="4" strokeLinecap="round" />
       </g>
-      {/* Hand 3: Green (Bottom Left) */}
       <g transform="rotate(240 50 50)">
         <path d="M55 25C65 25 75 35 75 45" stroke="#007d34" strokeWidth="8" strokeLinecap="round" />
         <path d="M55 25C50 25 45 30 43 35M47 32C42 32 37 37 35 42M51 28C46 28 41 33 39 38M59 28C59 23 54 18 49 18" stroke="#007d34" strokeWidth="4" strokeLinecap="round" />
@@ -34,6 +32,93 @@ export const KidoraLogo = ({ size = 40, showText = false, className = "" }: { si
     {showText && <span className="text-[#007d34] font-black text-xl uppercase tracking-widest mt-2">KIDORA</span>}
   </div>
 );
+
+interface ProductCardProps {
+  product: Product;
+  onProductClick: (p: Product) => void;
+}
+
+const ProductCard = ({ product, onProductClick }: ProductCardProps) => {
+  const [imgUrl, setImgUrl] = useState(product.images[0]);
+  const [isBroken, setIsBroken] = useState(false);
+  const [isRepairing, setIsRepairing] = useState(false);
+  const [repaired, setRepaired] = useState(false);
+
+  const handleImageError = async () => {
+    if (isRepairing || repaired) {
+      setIsBroken(true);
+      return;
+    }
+    
+    setIsRepairing(true);
+    // AI Diagnosis and Repair via Google Grounding
+    const repairResult = await repairBrokenImage(product.name, product.brand);
+    
+    if (repairResult?.suggestedUrl) {
+      setImgUrl(repairResult.suggestedUrl);
+      setRepaired(true);
+      setIsBroken(false);
+    } else {
+      setIsBroken(true);
+    }
+    setIsRepairing(false);
+  };
+
+  return (
+    <div 
+        onClick={() => onProductClick(product)}
+        className="group cursor-pointer flex flex-col"
+    >
+      <div className="aspect-[4/5] rounded-[32px] overflow-hidden bg-gray-50 mb-4 relative shadow-sm border border-gray-100 transition-shadow hover:shadow-xl">
+        {isRepairing ? (
+          <div className="absolute inset-0 flex flex-col items-center justify-center bg-green-50 text-[#007d34] gap-3">
+            <Loader2 size={24} className="animate-spin" />
+            <div className="text-center">
+              <span className="text-[8px] font-black uppercase tracking-widest block">AI Sourcing</span>
+              <span className="text-[6px] font-bold uppercase tracking-widest opacity-60">Searching Google...</span>
+            </div>
+          </div>
+        ) : isBroken ? (
+          <div className="w-full h-full flex flex-col items-center justify-center bg-gray-50 text-gray-300 gap-2">
+            <ImageOff size={32} strokeWidth={1.5} />
+            <span className="text-[8px] font-black uppercase tracking-widest text-gray-400">Image Unavailable</span>
+          </div>
+        ) : (
+          <>
+            <img 
+              src={imgUrl} 
+              alt={product.name} 
+              onError={handleImageError}
+              className={`w-full h-full object-cover group-hover:scale-110 transition-all duration-700 ${repaired ? 'saturate-125' : ''}`} 
+            />
+            {repaired && (
+              <div className="absolute top-4 left-4 flex items-center gap-1.5 bg-blue-500 text-white text-[7px] font-black px-2 py-1 rounded-lg shadow-lg border border-white/20 animate-in zoom-in-75">
+                <Globe size={10} />
+                <span>GOOGLE VERIFIED</span>
+              </div>
+            )}
+          </>
+        )}
+        
+        <button className="absolute top-4 right-4 p-2 bg-white/90 backdrop-blur-sm rounded-2xl shadow-sm text-gray-400 hover:text-red-500 transition-colors z-10">
+          <Heart size={16} />
+        </button>
+        <div className="absolute bottom-4 left-4 bg-[#007d34] text-white text-[8px] font-black px-2.5 py-1 rounded-lg shadow-lg uppercase tracking-wider z-10">
+            {product.condition}
+        </div>
+        <div className="absolute inset-0 bg-black/5 opacity-0 group-hover:opacity-100 transition-opacity" />
+      </div>
+      <div className="space-y-0.5 px-1">
+        <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest">{product.brand}</p>
+        <h3 className="font-bold text-sm line-clamp-1 text-gray-900"> {product.name}</h3>
+        <div className="flex items-center gap-2 pt-1">
+            <span className="font-black text-lg text-[#007d34]">{product.currency} {product.price}</span>
+            <span className="text-[10px] text-gray-300 line-through font-bold">{product.currency} {product.originalPrice}</span>
+        </div>
+      </div>
+    </div>
+  );
+};
 
 const HomeScreen: React.FC<HomeScreenProps> = ({ user, cartCount = 0, onProductClick, onExploreClick, onSellClick }) => {
   return (
@@ -142,30 +227,7 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ user, cartCount = 0, onProductC
         </div>
         <div className="grid grid-cols-2 gap-x-5 gap-y-10">
           {MOCK_PRODUCTS.slice(0, 4).map((product) => (
-            <div 
-                key={product.id} 
-                onClick={() => onProductClick(product)}
-                className="group cursor-pointer flex flex-col"
-            >
-              <div className="aspect-[4/5] rounded-[32px] overflow-hidden bg-gray-100 mb-4 relative shadow-sm border border-gray-100 transition-shadow hover:shadow-xl">
-                <img src={product.images[0]} alt={product.name} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" />
-                <button className="absolute top-4 right-4 p-2 bg-white/90 backdrop-blur-sm rounded-2xl shadow-sm text-gray-400 hover:text-red-500 transition-colors z-10">
-                  <Heart size={16} />
-                </button>
-                <div className="absolute bottom-4 left-4 bg-[#007d34] text-white text-[8px] font-black px-2.5 py-1 rounded-lg shadow-lg uppercase tracking-wider z-10">
-                    {product.condition}
-                </div>
-                <div className="absolute inset-0 bg-black/5 opacity-0 group-hover:opacity-100 transition-opacity" />
-              </div>
-              <div className="space-y-0.5 px-1">
-                <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest">{product.brand}</p>
-                <h3 className="font-bold text-sm line-clamp-1 text-gray-900"> {product.name}</h3>
-                <div className="flex items-center gap-2 pt-1">
-                    <span className="font-black text-lg text-[#007d34]">{product.currency} {product.price}</span>
-                    <span className="text-[10px] text-gray-300 line-through font-bold">{product.currency} {product.originalPrice}</span>
-                </div>
-              </div>
-            </div>
+            <ProductCard key={product.id} product={product} onProductClick={onProductClick} />
           ))}
         </div>
       </div>

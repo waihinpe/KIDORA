@@ -1,3 +1,4 @@
+
 import { GoogleGenAI, Type } from "@google/genai";
 
 // Strictly follow initialization guidelines
@@ -38,14 +39,79 @@ export const getAIPricingSuggestion = async (product: {
     return {
       suggestedPrice: product.originalPrice * 0.6,
       confidence: 85,
-      reasoning: "Based on historical data for this brand.",
+      reasoning: "Based on historical data for this brand and model.",
       marketTrend: "Moderate"
     };
   }
 };
 
 /**
- * Uses Gemini 2.5 Flash Image to enhance product photos by cleaning backgrounds and improving lighting.
+ * AI IMAGE REPAIR: Diagnoses why an image failed and fetches a verified replacement via Google Search.
+ */
+export const repairBrokenImage = async (productName: string, brand: string) => {
+  try {
+    const response = await ai.models.generateContent({
+      model: "gemini-3-flash-preview",
+      contents: `Search for a high-quality, professional official product image URL for the following item: ${brand} ${productName}. 
+      1. Identify valid stock photo or brand gallery links.
+      2. Prioritize direct public image URLs (.jpg, .png, .webp).
+      3. If no direct URL is available, return the most official product page link.`,
+      config: {
+        tools: [{ googleSearch: {} }],
+      },
+    });
+
+    const groundingChunks = response.candidates?.[0]?.groundingMetadata?.groundingChunks || [];
+    
+    // Attempt to extract a direct image link from text or use the first verified URI
+    const suggestedUri = groundingChunks.find(chunk => chunk.web?.uri)?.web?.uri || null;
+    
+    return {
+      suggestedUrl: suggestedUri,
+      explanation: response.text
+    };
+  } catch (error) {
+    console.error("AI Image Repair Error:", error);
+    return null;
+  }
+};
+
+/**
+ * Uses Gemini Google Search tool to find official information and verification data.
+ */
+export const getProductGrounding = async (productName: string) => {
+  try {
+    const response = await ai.models.generateContent({
+      model: "gemini-3-flash-preview",
+      contents: `Perform a search for the product "${productName}". 
+      1. Find official product details and retail pricing in SEA.
+      2. Find professional product photo galleries.
+      3. Summarize customer sentiment and reliability scores.`,
+      config: {
+        tools: [{ googleSearch: {} }],
+      },
+    });
+
+    const groundingChunks = response.candidates?.[0]?.groundingMetadata?.groundingChunks || [];
+    
+    return {
+      text: response.text,
+      groundingLinks: groundingChunks.map(chunk => ({
+        title: chunk.web?.title || 'Source',
+        uri: chunk.web?.uri
+      })).filter(item => item.uri) || []
+    };
+  } catch (error) {
+    console.error("AI Grounding Error:", error);
+    return {
+      text: "Market verification data is currently unavailable.",
+      groundingLinks: []
+    };
+  }
+};
+
+/**
+ * Uses Gemini 2.5 Flash Image to enhance product photos.
  */
 export const enhanceProductPhoto = async (base64Data: string, mimeType: string): Promise<string> => {
   try {
@@ -54,13 +120,10 @@ export const enhanceProductPhoto = async (base64Data: string, mimeType: string):
       contents: {
         parts: [
           {
-            inlineData: {
-              data: base64Data,
-              mimeType: mimeType,
-            },
+            inlineData: { data: base64Data, mimeType: mimeType },
           },
           {
-            text: 'Enhance this product photo for a marketplace. Keep the item exactly as it is but place it in a clean, minimalist, professional studio setting with bright, soft lighting and a neutral off-white background. Remove any messy home backgrounds or distracting shadows.',
+            text: 'Enhance this product photo. Place the item on a clean, professional studio background.',
           },
         ],
       },

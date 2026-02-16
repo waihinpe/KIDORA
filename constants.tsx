@@ -12,8 +12,8 @@ export const MOCK_PRODUCTS: Product[] = [
     originalPrice: 1600,
     currency: 'SGD',
     images: [
-      'https://images.unsplash.com/photo-1591084728795-1149fb3a288d?auto=format&fit=crop&q=80&w=800',
-      'https://images.unsplash.com/photo-1519689680058-324335c77eba?auto=format&fit=crop&q=80&w=800'
+      'https://images.unsplash.com/photo-1591084728795-1149fb3a288d?auto=format&fit=crop&q=80&w=1000',
+      'https://images.unsplash.com/photo-1519730104764-628abc97c17b?auto=format&fit=crop&q=80&w=1000'
     ],
     condition: 'Like New',
     age: '0-4 years',
@@ -31,7 +31,8 @@ export const MOCK_PRODUCTS: Product[] = [
     originalPrice: 220,
     currency: 'SGD',
     images: [
-      'https://images.unsplash.com/photo-1596464716127-f2a82984de30?auto=format&fit=crop&q=80&w=800'
+      'https://images.unsplash.com/photo-1596464716127-f2a82984de30?auto=format&fit=crop&q=80&w=1000',
+      'https://images.unsplash.com/photo-1515488042361-ee00e0ddd4e4?auto=format&fit=crop&q=80&w=1000'
     ],
     condition: 'Good',
     age: '0-12 months',
@@ -49,7 +50,8 @@ export const MOCK_PRODUCTS: Product[] = [
     originalPrice: 250,
     currency: 'SGD',
     images: [
-      'https://images.unsplash.com/photo-1602738328654-51ab2330b8b4?auto=format&fit=crop&q=80&w=800'
+      'https://images.unsplash.com/photo-1544070078-a212eda27b49?auto=format&fit=crop&q=80&w=1000',
+      'https://images.unsplash.com/photo-1602738328654-51ab2330b8b4?auto=format&fit=crop&q=80&w=1000'
     ],
     condition: 'Like New',
     age: '0-48 months',
@@ -67,7 +69,8 @@ export const MOCK_PRODUCTS: Product[] = [
     originalPrice: 120,
     currency: 'SGD',
     images: [
-      'https://images.unsplash.com/photo-1531323380760-700126848eac?auto=format&fit=crop&q=80&w=800'
+      'https://images.unsplash.com/photo-1531323380760-700126848eac?auto=format&fit=crop&q=80&w=1000',
+      'https://images.unsplash.com/photo-1530328308490-b88ca3ad1bc7?auto=format&fit=crop&q=80&w=1000'
     ],
     condition: 'Fair',
     age: '2-5 years',
@@ -85,7 +88,8 @@ export const MOCK_PRODUCTS: Product[] = [
     originalPrice: 450,
     currency: 'SGD',
     images: [
-      'https://images.unsplash.com/photo-1584622650111-993a426fbf0a?auto=format&fit=crop&q=80&w=800'
+      'https://images.unsplash.com/photo-1592078615290-033ee584e267?auto=format&fit=crop&q=80&w=1000',
+      'https://images.unsplash.com/photo-1596461404969-9ae70f2830c1?auto=format&fit=crop&q=80&w=1000'
     ],
     condition: 'Good',
     age: '6 months+',
@@ -103,7 +107,8 @@ export const MOCK_PRODUCTS: Product[] = [
     originalPrice: 75,
     currency: 'SGD',
     images: [
-      'https://images.unsplash.com/photo-1522771930-78848d9293e8?auto=format&fit=crop&q=80&w=800'
+      'https://images.unsplash.com/photo-1522771930-78848d9293e8?auto=format&fit=crop&q=80&w=1000',
+      'https://images.unsplash.com/photo-1522771965306-03612f00a6e0?auto=format&fit=crop&q=80&w=1000'
     ],
     condition: 'New',
     age: '0-6 months',
@@ -112,42 +117,6 @@ export const MOCK_PRODUCTS: Product[] = [
     sellerRating: 4.9,
     description: 'Pack of 3 organic muslin swaddles. Breathable and soft. Never opened.',
     impact: { co2Saved: 1.5, waterSaved: 80 }
-  },
-  {
-    id: '7',
-    name: 'Medela Freestyle Flex',
-    brand: 'Medela',
-    price: 220,
-    originalPrice: 550,
-    currency: 'SGD',
-    images: [
-      'https://images.unsplash.com/photo-1596464716127-f2a82984de30?auto=format&fit=crop&q=80&w=800'
-    ],
-    condition: 'Like New',
-    age: 'For Moms',
-    location: 'Ho Chi Minh, Vietnam',
-    sellerName: 'Lan H.',
-    sellerRating: 4.6,
-    description: 'Double electric breast pump. Compact, light and USB chargeable.',
-    impact: { co2Saved: 5.5, waterSaved: 100 }
-  },
-  {
-    id: '8',
-    name: 'Joie Serina 2-in-1',
-    brand: 'Joie',
-    price: 140,
-    originalPrice: 320,
-    currency: 'SGD',
-    images: [
-      'https://images.unsplash.com/photo-1544126592-807daa2b565b?auto=format&fit=crop&q=80&w=800'
-    ],
-    condition: 'Good',
-    age: '0-9 months',
-    location: 'Jurong, Singapore',
-    sellerName: 'Aom P.',
-    sellerRating: 4.7,
-    description: 'A sweet soother designed to sway just the way baby wants.',
-    impact: { co2Saved: 9.1, waterSaved: 120 }
   }
 ];
 
