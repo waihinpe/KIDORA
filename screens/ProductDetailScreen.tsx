@@ -1,9 +1,9 @@
 
 import React, { useState, useEffect, useRef } from 'react';
 /* Added Droplets to imports to fix line 300 error */
-import { ChevronLeft, Heart, Star, Shield, Leaf, Zap, Loader2, ChevronRight, CheckCircle2, ShoppingBag, Image as ImageIcon, Store, MessageCircle, ImageOff, ExternalLink, Globe, Search, Camera, Droplets } from 'lucide-react';
+import { ChevronLeft, Heart, Star, Shield, Leaf, Zap, Loader2, ChevronRight, CheckCircle2, ShoppingBag, Image as ImageIcon, Store, MessageCircle, ImageOff, ExternalLink, Globe, Search, Camera, Droplets, RefreshCw } from 'lucide-react';
 import { Product } from '../types';
-import { getAIPricingSuggestion, getProductGrounding } from '../services/geminiService';
+import { getAIPricingSuggestion, getProductGrounding, repairBrokenImage } from '../services/geminiService';
 
 interface ProductDetailScreenProps {
   product: Product;
@@ -18,8 +18,14 @@ const ProductDetailScreen: React.FC<ProductDetailScreenProps> = ({ product, onBa
   const [loadingAI, setLoadingAI] = useState(true);
   const [loadingGrounding, setLoadingGrounding] = useState(false);
   const [currentImgIndex, setCurrentImgIndex] = useState(0);
+  
+  // Advanced State for AI Image Repair
+  const [displayImages, setDisplayImages] = useState<string[]>(product.images);
   const [loadedImages, setLoadedImages] = useState<Set<number>>(new Set());
+  const [repairingIndices, setRepairingIndices] = useState<Set<number>>(new Set());
   const [failedImages, setFailedImages] = useState<Set<number>>(new Set());
+  const [repairedImages, setRepairedImages] = useState<Set<number>>(new Set());
+
   const scrollContainerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -63,10 +69,45 @@ const ProductDetailScreen: React.FC<ProductDetailScreenProps> = ({ product, onBa
     });
   };
 
-  const handleImageError = (index: number) => {
-    setFailedImages(prev => {
+  const handleImageError = async (index: number) => {
+    if (repairingIndices.has(index) || repairedImages.has(index)) {
+      setFailedImages(prev => {
+        const next = new Set(prev);
+        next.add(index);
+        return next;
+      });
+      return;
+    }
+
+    // AI Repair Trigger
+    setRepairingIndices(prev => {
       const next = new Set(prev);
       next.add(index);
+      return next;
+    });
+
+    const repair = await repairBrokenImage(product.name, product.brand);
+    
+    if (repair && repair.suggestedUrl) {
+      const nextImages = [...displayImages];
+      nextImages[index] = repair.suggestedUrl;
+      setDisplayImages(nextImages);
+      setRepairedImages(prev => {
+        const next = new Set(prev);
+        next.add(index);
+        return next;
+      });
+    } else {
+      setFailedImages(prev => {
+        const next = new Set(prev);
+        next.add(index);
+        return next;
+      });
+    }
+
+    setRepairingIndices(prev => {
+      const next = new Set(prev);
+      next.delete(index);
       return next;
     });
   };
@@ -103,12 +144,25 @@ const ProductDetailScreen: React.FC<ProductDetailScreenProps> = ({ product, onBa
           onScroll={handleScroll}
           className="flex w-full h-full overflow-x-auto snap-x snap-mandatory hide-scrollbar"
         >
-          {product.images.map((img, idx) => {
+          {displayImages.map((img, idx) => {
             const isLoaded = loadedImages.has(idx);
+            const isRepairing = repairingIndices.has(idx);
             const hasFailed = failedImages.has(idx);
+            const isRepaired = repairedImages.has(idx);
+
             return (
               <div key={idx} className="w-full h-full shrink-0 snap-center relative">
-                {!isLoaded && !hasFailed && (
+                {isRepairing && (
+                  <div className="absolute inset-0 bg-green-50 z-30 flex flex-col items-center justify-center gap-3">
+                    <Loader2 size={32} className="text-[#007d34] animate-spin" />
+                    <div className="text-center">
+                        <p className="text-[10px] font-black uppercase text-[#007d34] tracking-widest">AI Repairing</p>
+                        <p className="text-[8px] font-bold uppercase text-[#007d34]/60 tracking-[0.2em] mt-1">Sourcing verified photo...</p>
+                    </div>
+                  </div>
+                )}
+
+                {!isLoaded && !hasFailed && !isRepairing && (
                   <div className="absolute inset-0 bg-gradient-to-r from-gray-100 via-gray-50 to-gray-100 animate-shimmer" style={{ backgroundSize: '200% 100%' }} />
                 )}
                 
@@ -119,7 +173,7 @@ const ProductDetailScreen: React.FC<ProductDetailScreenProps> = ({ product, onBa
                   </div>
                 ) : (
                   <>
-                    {!isLoaded && (
+                    {!isLoaded && !isRepairing && (
                       <div className="absolute inset-0 flex items-center justify-center">
                         <ImageIcon size={48} className="text-gray-200" />
                       </div>
@@ -131,6 +185,12 @@ const ProductDetailScreen: React.FC<ProductDetailScreenProps> = ({ product, onBa
                       onError={() => handleImageError(idx)}
                       className={`w-full h-full object-cover transition-opacity duration-700 ${isLoaded ? 'opacity-100' : 'opacity-0'}`} 
                     />
+                    {isRepaired && isLoaded && (
+                      <div className="absolute bottom-16 left-6 bg-blue-500 text-white text-[8px] font-black px-3 py-1.5 rounded-xl shadow-xl flex items-center gap-2 border border-white/20 animate-in zoom-in-95">
+                        <Globe size={12} />
+                        <span>GOOGLE VERIFIED PHOTO</span>
+                      </div>
+                    )}
                   </>
                 )}
               </div>
@@ -139,7 +199,7 @@ const ProductDetailScreen: React.FC<ProductDetailScreenProps> = ({ product, onBa
         </div>
 
         <div className="absolute bottom-14 left-0 right-0 flex justify-center gap-2 z-20">
-            {product.images.map((_, i) => (
+            {displayImages.map((_, i) => (
                 <div 
                   key={i} 
                   className={`h-1.5 rounded-full transition-all duration-300 ${i === currentImgIndex ? 'w-6 bg-white shadow-sm' : 'w-1.5 bg-white/50'}`} 

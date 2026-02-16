@@ -1,20 +1,20 @@
 
 import React, { useState, useMemo } from 'react';
-import { Search, SlidersHorizontal, MapPin, ChevronDown, Check, Star, X, Map as MapIcon, Globe, Info, Eye, ShoppingCart, ArrowRight, Wand2, Sparkles, Loader2, Zap, ImageOff, Navigation, ChevronRight, Heart } from 'lucide-react';
-import { MOCK_PRODUCTS, PRIMARY_COLOR } from '../constants';
+import { Search, SlidersHorizontal, MapPin, ChevronDown, Star, Globe, Loader2, ImageOff, Navigation, Heart, Sparkles } from 'lucide-react';
+import { MOCK_PRODUCTS } from '../constants';
 import { Product } from '../types';
-import { enhanceProductPhoto, repairBrokenImage } from '../services/geminiService';
+import { repairBrokenImage } from '../services/geminiService';
 
 interface ExploreScreenProps {
   onProductClick: (product: Product) => void;
 }
 
-// Shared Product Card with AI Repair
 const ProductCard = ({ product, onProductClick }: { product: Product, onProductClick: (p: Product) => void }) => {
   const [imgUrl, setImgUrl] = useState(product.images[0]);
   const [isBroken, setIsBroken] = useState(false);
   const [isRepairing, setIsRepairing] = useState(false);
   const [repaired, setRepaired] = useState(false);
+  const [isLoaded, setIsLoaded] = useState(false);
 
   const handleImageError = async () => {
     if (isRepairing || repaired) {
@@ -40,13 +40,18 @@ const ProductCard = ({ product, onProductClick }: { product: Product, onProductC
         onClick={() => onProductClick(product)}
         className="group cursor-pointer flex flex-col animate-in fade-in slide-in-from-bottom-4 duration-500"
     >
-      <div className="aspect-[4/5] rounded-[32px] overflow-hidden bg-gray-50 mb-4 relative shadow-sm border border-gray-100 transition-shadow hover:shadow-xl">
+      <div className="aspect-[4/5] rounded-[32px] overflow-hidden bg-gray-50 mb-4 relative shadow-sm border border-gray-100 transition-all hover:shadow-xl hover:translate-y-[-4px]">
+        {/* Shimmer Placeholder */}
+        {!isLoaded && !isBroken && !isRepairing && (
+          <div className="absolute inset-0 bg-gradient-to-r from-gray-100 via-gray-50 to-gray-100 animate-pulse" />
+        )}
+
         {isRepairing ? (
           <div className="absolute inset-0 flex flex-col items-center justify-center bg-green-50 text-[#007d34] gap-3">
             <Loader2 size={24} className="animate-spin" />
             <div className="text-center">
               <span className="text-[8px] font-black uppercase tracking-widest block">AI Sourcing</span>
-              <span className="text-[6px] font-bold uppercase tracking-widest opacity-60">Searching Google...</span>
+              <span className="text-[6px] font-bold uppercase tracking-widest opacity-60">Sourcing HD Assets</span>
             </div>
           </div>
         ) : isBroken ? (
@@ -59,13 +64,16 @@ const ProductCard = ({ product, onProductClick }: { product: Product, onProductC
             <img 
               src={imgUrl} 
               alt={product.name} 
+              loading="lazy"
+              decoding="async"
+              onLoad={() => setIsLoaded(true)}
               onError={handleImageError}
-              className={`w-full h-full object-cover group-hover:scale-110 transition-all duration-700 ${repaired ? 'saturate-125' : ''}`} 
+              className={`w-full h-full object-cover group-hover:scale-110 transition-all duration-700 ${repaired ? 'saturate-125 brightness-105' : ''} ${isLoaded ? 'opacity-100' : 'opacity-0'}`} 
             />
             {repaired && (
               <div className="absolute top-4 left-4 flex items-center gap-1.5 bg-blue-500 text-white text-[7px] font-black px-2 py-1 rounded-lg shadow-lg border border-white/20 animate-in zoom-in-75">
-                <Globe size={10} />
-                <span>GOOGLE VERIFIED</span>
+                <Sparkles size={10} fill="currentColor" />
+                <span>AI REPAIRED HD</span>
               </div>
             )}
           </>
@@ -94,9 +102,8 @@ const ExploreScreen: React.FC<ExploreScreenProps> = ({ onProductClick }) => {
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedLocation, setSelectedLocation] = useState('All SEA');
   const [isLocationModalOpen, setIsLocationModalOpen] = useState(false);
-  const [isFilterModalOpen, setIsFilterModalOpen] = useState(false);
   const [selectedCondition, setSelectedCondition] = useState('All');
-  const [locationSearch, setLocationSearch] = useState('');
+  const [locationSearch] = useState('');
   const [isLocating, setIsLocating] = useState(false);
 
   const countries = [
@@ -224,7 +231,7 @@ const ExploreScreen: React.FC<ExploreScreenProps> = ({ onProductClick }) => {
             >
               <div className="flex items-center gap-4">
                 <Navigation size={20} className="text-[#007d34]" />
-                <span className="text-sm font-black text-[#007d34] uppercase tracking-wider">Use Current Location</span>
+                <span className="text-sm font-black text-[#007d34] uppercase tracking-wider">{isLocating ? 'Locating...' : 'Use Current Location'}</span>
               </div>
             </button>
             <div className="flex-1 overflow-y-auto hide-scrollbar space-y-6">
