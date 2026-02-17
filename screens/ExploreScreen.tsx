@@ -9,7 +9,8 @@ interface ExploreScreenProps {
   onProductClick: (product: Product) => void;
 }
 
-const ProductCard = ({ product, onProductClick }: { product: Product, onProductClick: (p: Product) => void }) => {
+// Added optional key prop to satisfy TypeScript strict prop checking when used in .map()
+const ProductCard = ({ product, onProductClick }: { product: Product, onProductClick: (p: Product) => void, key?: React.Key }) => {
   const [imgUrl, setImgUrl] = useState(product.images[0]);
   const [isBroken, setIsBroken] = useState(false);
   const [isRepairing, setIsRepairing] = useState(false);

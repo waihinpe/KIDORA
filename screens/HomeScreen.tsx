@@ -5,14 +5,6 @@ import { MOCK_PRODUCTS, PRIMARY_COLOR } from '../constants';
 import { Product, User } from '../types';
 import { repairBrokenImage } from '../services/geminiService';
 
-interface HomeScreenProps {
-  user: User | null;
-  cartCount?: number;
-  onProductClick: (product: Product) => void;
-  onExploreClick: () => void;
-  onSellClick: () => void;
-}
-
 export const KidoraLogo = ({ size = 40, showText = false, className = "" }: { size?: number, showText?: boolean, className?: string }) => (
   <div className={`flex flex-col items-center justify-center ${className}`}>
     <svg width={size} height={size} viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -33,9 +25,19 @@ export const KidoraLogo = ({ size = 40, showText = false, className = "" }: { si
   </div>
 );
 
+// Added optional key prop to satisfy TypeScript strict prop checking when used in .map()
 interface ProductCardProps {
   product: Product;
   onProductClick: (p: Product) => void;
+  key?: React.Key;
+}
+
+interface HomeScreenProps {
+  user: User | null;
+  cartCount?: number;
+  onProductClick: (product: Product) => void;
+  onExploreClick: () => void;
+  onSellClick: () => void;
 }
 
 const ProductCard = ({ product, onProductClick }: ProductCardProps) => {
@@ -43,6 +45,8 @@ const ProductCard = ({ product, onProductClick }: ProductCardProps) => {
   const [isBroken, setIsBroken] = useState(false);
   const [isRepairing, setIsRepairing] = useState(false);
   const [repaired, setRepaired] = useState(false);
+  const [isLoaded, setIsLoaded] = useState(false);
+  const [repairMethod, setRepairMethod] = useState<'search' | 'fallback' | null>(null);
 
   const handleImageError = async () => {
     if (isRepairing || repaired) {
@@ -51,13 +55,13 @@ const ProductCard = ({ product, onProductClick }: ProductCardProps) => {
     }
     
     setIsRepairing(true);
-    // AI Diagnosis and Repair via Google Grounding
     const repairResult = await repairBrokenImage(product.name, product.brand);
     
     if (repairResult?.suggestedUrl) {
       setImgUrl(repairResult.suggestedUrl);
       setRepaired(true);
       setIsBroken(false);
+      setRepairMethod(repairResult.explanation?.includes('Rate limit') ? 'fallback' : 'search');
     } else {
       setIsBroken(true);
     }
@@ -69,32 +73,47 @@ const ProductCard = ({ product, onProductClick }: ProductCardProps) => {
         onClick={() => onProductClick(product)}
         className="group cursor-pointer flex flex-col"
     >
-      <div className="aspect-[4/5] rounded-[32px] overflow-hidden bg-gray-50 mb-4 relative shadow-sm border border-gray-100 transition-shadow hover:shadow-xl">
+      <div className="aspect-[4/5] rounded-[32px] overflow-hidden bg-gray-50 mb-4 relative shadow-sm border border-gray-100 transition-all hover:shadow-xl hover:translate-y-[-4px]">
+        {/* Shimmer Placeholder */}
+        {!isLoaded && !isBroken && !isRepairing && (
+          <div className="absolute inset-0 bg-gradient-to-r from-gray-100 via-gray-50 to-gray-100 animate-shimmer" style={{ backgroundSize: '200% 100%' }} />
+        )}
+
         {isRepairing ? (
           <div className="absolute inset-0 flex flex-col items-center justify-center bg-green-50 text-[#007d34] gap-3">
             <Loader2 size={24} className="animate-spin" />
-            <div className="text-center">
+            <div className="text-center px-4">
               <span className="text-[8px] font-black uppercase tracking-widest block">AI Sourcing</span>
-              <span className="text-[6px] font-bold uppercase tracking-widest opacity-60">Searching Google...</span>
+              <span className="text-[6px] font-bold uppercase tracking-widest opacity-60">
+                Finding HD Catalog Image...
+              </span>
             </div>
           </div>
         ) : isBroken ? (
-          <div className="w-full h-full flex flex-col items-center justify-center bg-gray-50 text-gray-300 gap-2">
+          <div className="w-full h-full flex flex-col items-center justify-center bg-gray-50 text-gray-300 gap-3">
             <ImageOff size={32} strokeWidth={1.5} />
-            <span className="text-[8px] font-black uppercase tracking-widest text-gray-400">Image Unavailable</span>
+            <button 
+              onClick={(e) => { e.stopPropagation(); setIsBroken(false); setRepaired(false); handleImageError(); }}
+              className="text-[8px] font-black uppercase tracking-widest text-[#007d34] bg-[#e6f2eb] px-3 py-1.5 rounded-lg border border-green-100"
+            >
+              Retry AI Search
+            </button>
           </div>
         ) : (
           <>
             <img 
               src={imgUrl} 
               alt={product.name} 
+              loading="lazy"
+              decoding="async"
+              onLoad={() => setIsLoaded(true)}
               onError={handleImageError}
-              className={`w-full h-full object-cover group-hover:scale-110 transition-all duration-700 ${repaired ? 'saturate-125' : ''}`} 
+              className={`w-full h-full object-cover group-hover:scale-110 transition-all duration-1000 ${repaired ? 'saturate-[1.15] brightness-105' : ''} ${isLoaded ? 'opacity-100' : 'opacity-0'}`} 
             />
-            {repaired && (
-              <div className="absolute top-4 left-4 flex items-center gap-1.5 bg-blue-500 text-white text-[7px] font-black px-2 py-1 rounded-lg shadow-lg border border-white/20 animate-in zoom-in-75">
-                <Globe size={10} />
-                <span>GOOGLE VERIFIED</span>
+            {repaired && isLoaded && (
+              <div className={`absolute top-4 left-4 flex items-center gap-1.5 ${repairMethod === 'fallback' ? 'bg-orange-500' : 'bg-blue-500'} text-white text-[7px] font-black px-2.5 py-1.5 rounded-xl shadow-xl border border-white/20 animate-in zoom-in-75`}>
+                {repairMethod === 'fallback' ? <ShieldCheck size={10} /> : <Globe size={10} />}
+                <span>{repairMethod === 'fallback' ? 'VERIFIED PRE-LOVED' : 'GOOGLE SEARCH HD'}</span>
               </div>
             )}
           </>
@@ -110,7 +129,7 @@ const ProductCard = ({ product, onProductClick }: ProductCardProps) => {
       </div>
       <div className="space-y-0.5 px-1">
         <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest">{product.brand}</p>
-        <h3 className="font-bold text-sm line-clamp-1 text-gray-900"> {product.name}</h3>
+        <h3 className="font-bold text-sm line-clamp-1 text-gray-900 leading-tight"> {product.name}</h3>
         <div className="flex items-center gap-2 pt-1">
             <span className="font-black text-lg text-[#007d34]">{product.currency} {product.price}</span>
             <span className="text-[10px] text-gray-300 line-through font-bold">{product.currency} {product.originalPrice}</span>
@@ -231,6 +250,15 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ user, cartCount = 0, onProductC
           ))}
         </div>
       </div>
+      <style>{`
+        @keyframes shimmer {
+          0% { background-position: -200% 0; }
+          100% { background-position: 200% 0; }
+        }
+        .animate-shimmer {
+          animation: shimmer 1.5s infinite;
+        }
+      `}</style>
     </div>
   );
 };

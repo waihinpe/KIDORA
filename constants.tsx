@@ -13,7 +13,7 @@ export const MOCK_PRODUCTS: Product[] = [
     currency: 'SGD',
     images: [
       'https://images.unsplash.com/photo-1591084728795-1149fb3a288d?auto=format&fit=crop&q=90&w=1600',
-      'https://images.unsplash.com/photo-1519730104764-628abc97c17b?auto=format&fit=crop&q=90&w=1600'
+      'https://images.unsplash.com/photo-1594913785162-e6786b42dea3?auto=format&fit=crop&q=90&w=1600'
     ],
     condition: 'Like New',
     age: '0-4 years',
