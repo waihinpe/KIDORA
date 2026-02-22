@@ -13,10 +13,13 @@ import OnboardingScreen from './screens/OnboardingScreen';
 import CheckoutScreen from './screens/CheckoutScreen';
 
 const App: React.FC = () => {
-  const [currentScreen, setCurrentScreen] = useState<Screen>(Screen.ONBOARDING);
+  const [currentScreen, setCurrentScreen] = useState<Screen>(Screen.LOGIN);
+
+
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
   const [user, setUser] = useState<User | null>(null);
   const [isInitializing, setIsInitializing] = useState(true);
+
   const [cartCount, setCartCount] = useState(0);
 
   // Persistence check for User and Onboarding status
@@ -50,6 +53,9 @@ const App: React.FC = () => {
     localStorage.setItem('kidora_onboarding_complete', 'true');
     setCurrentScreen(Screen.HOME);
   };
+
+
+
 
   const handleLogin = (email: string) => {
     const mockUser: User = {

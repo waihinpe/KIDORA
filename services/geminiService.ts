@@ -1,8 +1,19 @@
 
 import { GoogleGenAI, Type } from "@google/genai";
 
-// Initialize Gemini API
-const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
+// Initialize Gemini API with a safe fallback for process.env
+const getApiKey = () => {
+  try {
+    // @ts-ignore - process.env might be replaced by Vite or missing
+    const key = process.env.API_KEY;
+    return key || 'dummy-key';
+  } catch (e) {
+    return 'dummy-key';
+  }
+};
+
+const ai = new GoogleGenAI({ apiKey: getApiKey() });
+
 
 // Circuit breaker state
 let isRateLimited = false;
