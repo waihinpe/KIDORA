@@ -162,8 +162,9 @@ const ExploreScreen: React.FC<ExploreScreenProps> = ({ onProductClick }) => {
 
   return (
     <div className="flex flex-col min-h-full">
-      {/* Search Header */}
-      <div className="sticky top-0 bg-white z-40 pt-8 pb-4 px-6 border-b border-gray-50 shadow-sm">
+      {/* Search Header - Sticky */}
+      <div className="sticky top-0 z-40 bg-white/80 backdrop-blur-md border-b border-gray-100 pt-8 pb-4 px-6 shadow-sm">
+
         <div className="flex items-center justify-between mb-4">
           <button 
             onClick={() => setIsLocationModalOpen(true)}

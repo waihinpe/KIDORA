@@ -142,31 +142,32 @@ const ProductCard = ({ product, onProductClick }: ProductCardProps) => {
 const HomeScreen: React.FC<HomeScreenProps> = ({ user, cartCount = 0, onProductClick, onExploreClick, onSellClick }) => {
   return (
     <div className="flex flex-col space-y-6">
-      {/* Header */}
-      <div className="px-6 pt-8 flex justify-between items-center">
+      {/* Header - Sticky */}
+      <div className="sticky top-0 z-40 bg-white/80 backdrop-blur-md border-b border-gray-100 px-6 py-4 flex justify-between items-center transition-all">
         <div className="flex items-center gap-3">
-          <div className="w-12 h-12 bg-white rounded-2xl shadow-sm border border-gray-100 flex items-center justify-center overflow-hidden">
-             <KidoraLogo size={32} />
+          <div className="w-10 h-10 bg-white rounded-xl shadow-sm border border-gray-100 flex items-center justify-center overflow-hidden">
+             <KidoraLogo size={28} />
           </div>
           <div>
-            <h1 className="text-2xl font-black tracking-tighter text-[#007d34]">KIDORA</h1>
-            <p className="text-[10px] text-gray-400 font-bold uppercase tracking-widest">Give Kids Gear a Second Life</p>
+            <h1 className="text-xl font-black tracking-tighter text-[#007d34]">KIDORA</h1>
+            <p className="text-[8px] text-gray-400 font-bold uppercase tracking-widest">Give Kids Gear a Second Life</p>
           </div>
         </div>
         <div className="flex items-center gap-2">
-            <div className="p-2.5 bg-gray-50 rounded-2xl border border-gray-100 text-gray-400 active:scale-95 transition-transform cursor-pointer">
-                <Search size={20} />
+            <div className="p-2 bg-gray-50 rounded-xl border border-gray-100 text-gray-400 active:scale-95 transition-transform cursor-pointer">
+                <Search size={18} />
             </div>
-            <div className="relative p-2.5 bg-gray-50 rounded-2xl border border-gray-100 text-gray-400 active:scale-95 transition-transform cursor-pointer">
-                <ShoppingBag size={20} />
+            <div className="relative p-2 bg-gray-50 rounded-xl border border-gray-100 text-gray-400 active:scale-95 transition-transform cursor-pointer">
+                <ShoppingBag size={18} />
                 {cartCount > 0 && (
-                  <span className="absolute top-1 right-1 bg-[#007d34] text-white text-[8px] rounded-full h-4 w-4 flex items-center justify-center font-bold border-2 border-white animate-in zoom-in duration-300">
+                  <span className="absolute -top-1 -right-1 bg-[#007d34] text-white text-[8px] rounded-full h-4 w-4 flex items-center justify-center font-bold border-2 border-white animate-in zoom-in duration-300">
                     {cartCount}
                   </span>
                 )}
             </div>
         </div>
       </div>
+
 
       {/* Sustainability Highlight */}
       <div className="px-6">

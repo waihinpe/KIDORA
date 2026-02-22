@@ -77,14 +77,14 @@ export const repairBrokenImage = async (productName: string, brand: string) => {
   } catch (error) {
     // Highly relevant category-specific Unsplash fallbacks
     const name = productName.toLowerCase();
-    let fallback = 'https://images.unsplash.com/photo-1591084728795-1149fb3a288d?auto=format&fit=crop&q=80&w=1200'; // Stroller
+    let fallback = 'https://dreamonme.com/vt1/wp-content/uploads/523_BLK_Silo_01-min-scaled.jpg'; // Stroller
     
     if (name.includes('bike') || name.includes('scooter') || name.includes('tricycle')) {
-      fallback = 'https://images.unsplash.com/photo-1531323380760-700126848eac?auto=format&fit=crop&q=80&w=1200';
+      fallback = 'https://m.media-amazon.com/images/I/71mbagdMEaL._AC_SL1500_.jpg';
     } else if (name.includes('gym') || name.includes('toy') || name.includes('play')) {
       fallback = 'https://images.unsplash.com/photo-1515488042361-ee00e0ddd4e4?auto=format&fit=crop&q=80&w=1200';
     } else if (name.includes('carrier') || name.includes('sling') || name.includes('wrap')) {
-      fallback = 'https://images.unsplash.com/photo-1544070078-a212eda27b49?auto=format&fit=crop&q=80&w=1200';
+      fallback = 'https://www.rei.com/dam/20725233_245751_121724_61877_web_med.jpeg';
     } else if (name.includes('chair') || name.includes('highchair')) {
       fallback = 'https://images.unsplash.com/photo-1592078615290-033ee584e267?auto=format&fit=crop&q=80&w=1200';
     } else if (name.includes('swaddle') || name.includes('clothing') || name.includes('set')) {

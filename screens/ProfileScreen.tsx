@@ -164,105 +164,110 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ user, onLogout, onLoginPr
   ];
 
   return (
-    <div className="flex flex-col min-h-full pb-10 animate-in fade-in duration-500">
-      {/* Header */}
-      <div className="pt-10 px-6 pb-6 flex justify-between items-center">
-        <h1 className="text-2xl font-bold">My Dashboard</h1>
-        <button className="p-2.5 bg-gray-50 rounded-2xl border border-gray-100">
-            <Settings size={20} className="text-gray-500" />
+    <div className="flex flex-col min-h-full">
+      {/* Header - Sticky */}
+      <div className="sticky top-0 z-40 bg-white/80 backdrop-blur-md border-b border-gray-100 px-6 py-6 flex justify-between items-center transition-all">
+        <h1 className="text-2xl font-bold text-gray-900">My Dashboard</h1>
+        <button className="p-2.5 bg-gray-50 rounded-2xl border border-gray-100 text-gray-500 hover:bg-gray-100 active:scale-95 transition-all">
+            <Settings size={20} />
         </button>
       </div>
 
-      {/* User Info */}
-      <div className="px-6 mb-8 flex items-center gap-4">
-        <div className="relative">
-            <img 
-                src={user.avatar || `https://i.pravatar.cc/150?u=${user.id}`} 
-                className="w-20 h-20 rounded-[32px] border-4 border-white shadow-lg object-cover" 
-            />
-            <div className="absolute -bottom-1 -right-1 bg-[#007d34] p-1.5 rounded-xl border-2 border-white">
-                <Award size={14} className="text-white" />
-            </div>
-        </div>
-        <div>
-            <h2 className="text-xl font-bold text-gray-900">{user.name}</h2>
-            <p className="text-sm text-gray-500">Eco-conscious Mom since {new Date(user.joinedDate).getFullYear()}</p>
-            <div className="flex items-center gap-1 mt-1 text-yellow-500 font-bold text-xs">
-                <Star size={12} fill="currentColor" />
-                <span>{user.rating} ({user.reviewsCount} reviews)</span>
-            </div>
-        </div>
-      </div>
+      <div className="flex-1 flex flex-col pb-24 custom-scrollbar">
 
-      {/* Wallet Card */}
-      <div className="px-6 mb-8">
-        <div className="bg-gray-900 rounded-[40px] p-8 text-white flex justify-between items-center">
-            <div>
-                <p className="text-[10px] uppercase font-bold opacity-60 mb-1">Total Earnings</p>
-                <p className="text-3xl font-bold">SGD {user.totalEarnings.toLocaleString()}</p>
-            </div>
-            <button className="bg-white/10 p-4 rounded-3xl hover:bg-white/20 transition-all">
-                <Wallet size={24} />
-            </button>
-        </div>
-      </div>
-
-      {/* Main Actions */}
-      <div className="px-6 grid grid-cols-2 gap-4 mb-8">
-        <button onClick={() => setActiveModal('selling')} className="bg-gray-50 p-5 rounded-3xl border border-gray-100 flex flex-col items-center gap-2 group hover:bg-[#e6f2eb] transition-all">
-            <Package size={24} className="text-gray-400 group-hover:text-[#007d34]" />
-            <span className="text-xs font-bold">Active Listings (8)</span>
-        </button>
-        <button className="bg-gray-50 p-5 rounded-3xl border border-gray-100 flex flex-col items-center gap-2 group hover:bg-[#e6f2eb] transition-all">
-            <Heart size={24} className="text-gray-400 group-hover:text-red-500" />
-            <span className="text-xs font-bold">Favorites (24)</span>
-        </button>
-      </div>
-
-      {/* Settings List */}
-      <div className="px-6 space-y-2">
-        {menuItems.map((item) => (
-            <button 
-                key={item.label}
-                onClick={item.action}
-                className={`w-full flex items-center justify-between p-5 rounded-3xl transition-all ${item.danger ? 'text-red-500 hover:bg-red-50' : 'hover:bg-gray-50 border border-transparent hover:border-gray-100'}`}
-            >
-                <div className="flex items-center gap-4">
-                    <div className={`p-2 rounded-xl ${item.danger ? 'bg-red-100' : 'bg-gray-100 text-gray-500'}`}>
-                        <item.icon size={18} />
-                    </div>
-                    <div className="text-left">
-                        <p className="text-sm font-bold">{item.label}</p>
-                        {item.value && <p className="text-[10px] text-gray-400 font-medium">{item.value}</p>}
-                    </div>
-                </div>
-                {!item.danger && <ChevronRight size={16} className="text-gray-300" />}
-            </button>
-        ))}
-      </div>
-
-      {/* Interactive Bottom Modal */}
-      {activeModal && (
-        <div className="fixed inset-0 z-[100] flex items-end justify-center px-4 pb-4 animate-in fade-in duration-300">
-          <div className="absolute inset-0 bg-gray-900/40 backdrop-blur-sm" onClick={() => setActiveModal(null)} />
-          <div className="relative w-full max-w-md bg-white rounded-[40px] p-8 shadow-2xl animate-in slide-in-from-bottom-10 duration-500 max-h-[85vh] flex flex-col">
-            <div className="w-12 h-1.5 bg-gray-100 rounded-full mx-auto mb-6 shrink-0" />
-            
-            <div className="flex items-center justify-between mb-8 shrink-0">
-              <h2 className="text-2xl font-black text-gray-900">{getModalTitle()}</h2>
-              <button onClick={() => setActiveModal(null)} className="p-2 text-gray-400 bg-gray-50 rounded-full hover:bg-gray-100 transition-colors">
-                <X size={20} />
-              </button>
-            </div>
-
-            <div className="flex-1 overflow-y-auto hide-scrollbar">
-              {renderModalContent()}
-            </div>
+        {/* User Info */}
+        <div className="px-6 mb-8 mt-4 flex items-center gap-4">
+          <div className="relative">
+              <img 
+                  src={user.avatar || `https://i.pravatar.cc/150?u=${user.id}`} 
+                  className="w-20 h-20 rounded-[32px] border-4 border-white shadow-lg object-cover" 
+              />
+              <div className="absolute -bottom-1 -right-1 bg-[#007d34] p-1.5 rounded-xl border-2 border-white">
+                  <Award size={14} className="text-white" />
+              </div>
+          </div>
+          <div>
+              <h2 className="text-xl font-bold text-gray-900">{user.name}</h2>
+              <p className="text-sm text-gray-500">Eco-conscious Mom since {new Date(user.joinedDate).getFullYear()}</p>
+              <div className="flex items-center gap-1 mt-1 text-yellow-500 font-bold text-xs">
+                  <Star size={12} fill="currentColor" />
+                  <span>{user.rating} ({user.reviewsCount} reviews)</span>
+              </div>
           </div>
         </div>
-      )}
+
+        {/* Wallet Card */}
+        <div className="px-6 mb-8">
+          <div className="bg-gray-900 rounded-[40px] p-8 text-white flex justify-between items-center shadow-xl shadow-gray-900/10">
+              <div>
+                  <p className="text-[10px] uppercase font-bold opacity-60 mb-1 tracking-widest">Total Earnings</p>
+                  <p className="text-3xl font-bold tracking-tight">SGD {user.totalEarnings.toLocaleString()}</p>
+              </div>
+              <button className="bg-white/10 p-4 rounded-3xl hover:bg-white/20 transition-all active:scale-95 shadow-inner">
+                  <Wallet size={24} />
+              </button>
+          </div>
+        </div>
+
+        {/* Main Actions */}
+        <div className="px-6 grid grid-cols-2 gap-4 mb-8">
+          <button onClick={() => setActiveModal('selling')} className="bg-gray-50 p-5 rounded-3xl border border-gray-100 flex flex-col items-center gap-2 group hover:bg-[#e6f2eb] hover:border-[#007d34]/20 transition-all active:scale-95">
+              <Package size={24} className="text-gray-400 group-hover:text-[#007d34] transition-colors" />
+              <span className="text-xs font-bold text-gray-700">Active Listings (8)</span>
+          </button>
+          <button className="bg-gray-50 p-5 rounded-3xl border border-gray-100 flex flex-col items-center gap-2 group hover:bg-[#e6f2eb] hover:border-[#007d34]/20 transition-all active:scale-95">
+              <Heart size={24} className="text-gray-400 group-hover:text-red-500 transition-colors" />
+              <span className="text-xs font-bold text-gray-700">Favorites (24)</span>
+          </button>
+        </div>
+
+        {/* Settings List */}
+        <div className="px-6 space-y-2">
+          {menuItems.map((item) => (
+              <button 
+                  key={item.label}
+                  onClick={item.action}
+                  className={`w-full flex items-center justify-between p-5 rounded-3xl transition-all ${item.danger ? 'text-red-500 hover:bg-red-50' : 'hover:bg-gray-50 border border-transparent hover:border-gray-100'}`}
+              >
+                  <div className="flex items-center gap-4">
+                      <div className={`p-2.5 rounded-xl ${item.danger ? 'bg-red-100' : 'bg-gray-100 text-gray-500'}`}>
+                          <item.icon size={18} />
+                      </div>
+                      <div className="text-left">
+                          <p className="text-sm font-bold tracking-tight">{item.label}</p>
+                          {item.value && <p className="text-[10px] text-gray-400 font-medium tracking-wide uppercase">{item.value}</p>}
+                      </div>
+                  </div>
+                  {!item.danger && <ChevronRight size={16} className="text-gray-300" />}
+              </button>
+          ))}
+        </div>
+
+        {/* Interactive Bottom Modal */}
+        {activeModal && (
+          <div className="fixed inset-0 z-[100] flex items-end justify-center px-4 pb-4 animate-in fade-in duration-300">
+            <div className="absolute inset-0 bg-gray-900/40 backdrop-blur-sm" onClick={() => setActiveModal(null)} />
+            <div className="relative w-full max-w-md bg-white rounded-[40px] p-8 shadow-2xl animate-in slide-in-from-bottom-10 duration-500 max-h-[85vh] flex flex-col">
+              <div className="w-12 h-1.5 bg-gray-100 rounded-full mx-auto mb-6 shrink-0" />
+              
+              <div className="flex items-center justify-between mb-8 shrink-0">
+                <h2 className="text-2xl font-black text-gray-900 tracking-tight">{getModalTitle()}</h2>
+                <button onClick={() => setActiveModal(null)} className="p-2 text-gray-400 bg-gray-50 rounded-full hover:bg-gray-100 transition-colors active:scale-95">
+                  <X size={20} />
+                </button>
+              </div>
+
+              <div className="flex-1 overflow-y-auto hide-scrollbar">
+                {renderModalContent()}
+              </div>
+            </div>
+          </div>
+        )}
+      </div>
     </div>
   );
+
 };
 
 export default ProfileScreen;
+

@@ -19,13 +19,14 @@ const Layout: React.FC<LayoutProps> = ({ children, activeScreen, setScreen }) =>
   ];
 
   return (
-    <div className="flex flex-col h-screen max-w-md mx-auto bg-white shadow-xl relative overflow-hidden">
+    <div className="flex flex-col flex-1 relative overflow-hidden">
       <main className="flex-1 overflow-y-auto hide-scrollbar pb-24">
         {children}
       </main>
 
       {/* Bottom Nav */}
       <nav className="absolute bottom-0 left-0 right-0 bg-white border-t border-gray-100 flex justify-around items-center py-3 px-2 z-50">
+
         {navItems.map((item) => {
           const Icon = item.icon;
           const isActive = activeScreen === item.id;

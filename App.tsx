@@ -193,27 +193,32 @@ const App: React.FC = () => {
     }
   }
 
-  // Screens that should not show the main bottom navigation
-  const fullScreenViews = [Screen.LOGIN, Screen.ONBOARDING, Screen.SELL, Screen.PRODUCT_DETAIL, Screen.CHECKOUT];
-  const isFullScreen = fullScreenViews.includes(currentScreen);
+  const renderContent = () => {
+    if (isInitializing) return <div className="h-full w-full bg-white animate-pulse" />;
+    
+    // Screens that should not show the main bottom navigation
+    const fullScreenViews = [Screen.LOGIN, Screen.ONBOARDING, Screen.SELL, Screen.PRODUCT_DETAIL, Screen.CHECKOUT];
+    const isFullScreen = fullScreenViews.includes(currentScreen);
 
-  if (isFullScreen) {
+    if (isFullScreen) {
+      return renderScreen();
+    }
+
     return (
-      <div className="min-h-screen bg-[#f1f3f5] md:flex md:items-center md:justify-center p-0 md:p-8">
-        <div className="w-full max-w-md bg-white shadow-xl h-screen overflow-hidden relative border-x border-gray-100">
-          {renderScreen()}
-        </div>
-      </div>
-    );
-  }
-
-  return (
-    <div className="min-h-screen bg-[#f1f3f5] md:flex md:items-center md:justify-center p-0 md:p-8">
       <Layout activeScreen={currentScreen} setScreen={setCurrentScreen}>
         {renderScreen()}
       </Layout>
+    );
+  };
+
+  return (
+    <div className="min-h-screen bg-[#f1f3f5] md:flex md:items-center md:justify-center p-0 md:p-8">
+      <div className="w-full max-w-md bg-white shadow-xl h-screen overflow-hidden relative border-x border-gray-100 flex flex-col">
+        {renderContent()}
+      </div>
     </div>
   );
 };
+
 
 export default App;

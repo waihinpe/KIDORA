@@ -12,8 +12,8 @@ export const MOCK_PRODUCTS: Product[] = [
     originalPrice: 1600,
     currency: 'SGD',
     images: [
-      'https://images.unsplash.com/photo-1591084728795-1149fb3a288d?auto=format&fit=crop&q=90&w=1600',
-      'https://images.unsplash.com/photo-1594913785162-e6786b42dea3?auto=format&fit=crop&q=90&w=1600'
+      'https://dreamonme.com/vt1/wp-content/uploads/523_BLK_Silo_01-min-scaled.jpg',
+      'https://dreamonme.com/vt1/wp-content/uploads/523_BLK_Silo_01-min-scaled.jpg'
     ],
     condition: 'Like New',
     age: '0-4 years',
@@ -31,8 +31,8 @@ export const MOCK_PRODUCTS: Product[] = [
     originalPrice: 220,
     currency: 'SGD',
     images: [
-      'https://images.unsplash.com/photo-1515488042361-ee00e0ddd4e4?auto=format&fit=crop&q=90&w=1600',
-      'https://images.unsplash.com/photo-1596464716127-f2a82984de30?auto=format&fit=crop&q=90&w=1600'
+      'https://images.unsplash.com/photo-1515488042361-ee00e0ddd4e4?auto=format&fit=crop&q=80&w=1200',
+      'https://images.unsplash.com/photo-1515488042361-ee00e0ddd4e4?auto=format&fit=crop&q=80&w=1200'
     ],
     condition: 'Good',
     age: '0-12 months',
@@ -50,8 +50,8 @@ export const MOCK_PRODUCTS: Product[] = [
     originalPrice: 250,
     currency: 'SGD',
     images: [
-      'https://images.unsplash.com/photo-1544070078-a212eda27b49?auto=format&fit=crop&q=90&w=1600',
-      'https://images.unsplash.com/photo-1602738328654-51ab2330b8b4?auto=format&fit=crop&q=90&w=1600'
+      'https://www.rei.com/dam/20725233_245751_121724_61877_web_med.jpeg',
+      'https://www.rei.com/dam/20725233_245751_121724_61877_web_med.jpeg'
     ],
     condition: 'Like New',
     age: '0-48 months',
@@ -69,8 +69,8 @@ export const MOCK_PRODUCTS: Product[] = [
     originalPrice: 120,
     currency: 'SGD',
     images: [
-      'https://images.unsplash.com/photo-1531323380760-700126848eac?auto=format&fit=crop&q=90&w=1600',
-      'https://images.unsplash.com/photo-1530328308490-b88ca3ad1bc7?auto=format&fit=crop&q=90&w=1600'
+      'https://m.media-amazon.com/images/I/71mbagdMEaL._AC_SL1500_.jpg',
+      'https://m.media-amazon.com/images/I/71mbagdMEaL._AC_SL1500_.jpg'
     ],
     condition: 'Fair',
     age: '2-5 years',
@@ -88,8 +88,8 @@ export const MOCK_PRODUCTS: Product[] = [
     originalPrice: 450,
     currency: 'SGD',
     images: [
-      'https://images.unsplash.com/photo-1592078615290-033ee584e267?auto=format&fit=crop&q=90&w=1600',
-      'https://images.unsplash.com/photo-1596461404969-9ae70f2830c1?auto=format&fit=crop&q=90&w=1600'
+      'https://images.unsplash.com/photo-1592078615290-033ee584e267?auto=format&fit=crop&q=80&w=1200',
+      'https://images.unsplash.com/photo-1592078615290-033ee584e267?auto=format&fit=crop&q=80&w=1200'
     ],
     condition: 'Good',
     age: '6 months+',
@@ -107,8 +107,8 @@ export const MOCK_PRODUCTS: Product[] = [
     originalPrice: 75,
     currency: 'SGD',
     images: [
-      'https://images.unsplash.com/photo-1522771930-78848d9293e8?auto=format&fit=crop&q=90&w=1600',
-      'https://images.unsplash.com/photo-152277165306-03612f00a6e0?auto=format&fit=crop&q=90&w=1600'
+      'https://images.unsplash.com/photo-1522771930-78848d9293e8?auto=format&fit=crop&q=80&w=1200',
+      'https://images.unsplash.com/photo-1522771930-78848d9293e8?auto=format&fit=crop&q=80&w=1200'
     ],
     condition: 'New',
     age: '0-6 months',
