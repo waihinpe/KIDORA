@@ -24,10 +24,10 @@ const LoginScreen: React.FC<LoginScreenProps> = ({ onLogin, onGuest }) => {
   };
 
   return (
-    <div className="flex flex-col h-full bg-white px-8 pt-12 pb-10 animate-in fade-in duration-500">
+    <div className="flex flex-col h-full bg-white px-8 pt-8 pb-6 animate-in fade-in duration-500">
       <div className="flex-1 flex flex-col justify-center">
         {/* Branding */}
-        <div className="text-center mb-12">
+        <div className="text-center mb-6">
           <div className="mb-0 flex justify-center">
             <KidoraLogo size={100} />
           </div>
@@ -38,8 +38,8 @@ const LoginScreen: React.FC<LoginScreenProps> = ({ onLogin, onGuest }) => {
         </div>
 
         {/* Benefits */}
-        <div className="space-y-4 mb-12 px-2">
-            <div className="flex items-center gap-4 p-5 rounded-[28px] bg-gray-50 border border-gray-100 shadow-sm">
+        <div className="space-y-3 mb-6 px-2">
+            <div className="flex items-center gap-4 p-4 rounded-[28px] bg-gray-50 border border-gray-100 shadow-sm">
                 <div className="p-3 bg-white rounded-2xl text-[#007d34] shadow-sm">
                     <Heart size={20} />
                 </div>
@@ -48,7 +48,7 @@ const LoginScreen: React.FC<LoginScreenProps> = ({ onLogin, onGuest }) => {
                     <p className="text-[11px] text-gray-500 font-medium">Verified premium baby brands at a fraction of retail price.</p>
                 </div>
             </div>
-            <div className="flex items-center gap-4 p-5 rounded-[28px] bg-gray-50 border border-gray-100 shadow-sm">
+            <div className="flex items-center gap-4 p-4 rounded-[28px] bg-gray-50 border border-gray-100 shadow-sm">
                 <div className="p-3 bg-white rounded-2xl text-blue-500 shadow-sm">
                     <ShieldCheck size={20} />
                 </div>
@@ -60,7 +60,7 @@ const LoginScreen: React.FC<LoginScreenProps> = ({ onLogin, onGuest }) => {
         </div>
 
         {/* Form */}
-        <form onSubmit={handleSubmit} className="space-y-4">
+        <form onSubmit={handleSubmit} className="space-y-3">
           <div className="relative group">
             <div className="absolute inset-y-0 left-5 flex items-center text-gray-300 group-focus-within:text-[#007d34] transition-colors">
               <Mail size={18} />
@@ -68,7 +68,7 @@ const LoginScreen: React.FC<LoginScreenProps> = ({ onLogin, onGuest }) => {
             <input 
               type="email" 
               placeholder="Email address"
-              className="w-full bg-gray-50 border border-gray-100 rounded-[28px] pl-14 pr-5 py-5 text-sm font-bold outline-none focus:bg-white focus:border-[#007d34] focus:ring-4 focus:ring-green-50 transition-all shadow-sm placeholder-gray-300"
+              className="w-full bg-gray-50 border border-gray-100 rounded-[28px] pl-14 pr-5 py-4 text-sm font-bold outline-none focus:bg-white focus:border-[#007d34] focus:ring-4 focus:ring-green-50 transition-all shadow-sm placeholder-gray-300"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               required
@@ -77,7 +77,7 @@ const LoginScreen: React.FC<LoginScreenProps> = ({ onLogin, onGuest }) => {
           <button 
             type="submit"
             disabled={isSubmitting || !email}
-            className="w-full bg-[#007d34] text-white py-5 rounded-[28px] font-black uppercase tracking-[0.2em] text-[10px] shadow-2xl shadow-green-900/20 active:scale-95 transition-all flex items-center justify-center gap-2 disabled:opacity-50"
+            className="w-full bg-[#007d34] text-white py-4 rounded-[28px] font-black uppercase tracking-[0.2em] text-[10px] shadow-2xl shadow-green-900/20 active:scale-95 transition-all flex items-center justify-center gap-2 disabled:opacity-50"
           >
             {isSubmitting ? <Loader2 size={16} className="animate-spin" /> : (
               <>
@@ -88,7 +88,7 @@ const LoginScreen: React.FC<LoginScreenProps> = ({ onLogin, onGuest }) => {
           </button>
         </form>
 
-        <div className="relative my-12">
+        <div className="relative my-6">
           <div className="absolute inset-0 flex items-center">
             <div className="w-full border-t border-gray-100"></div>
           </div>
@@ -98,18 +98,18 @@ const LoginScreen: React.FC<LoginScreenProps> = ({ onLogin, onGuest }) => {
         </div>
 
         <div className="grid grid-cols-2 gap-4">
-            <button className="flex items-center justify-center gap-3 py-5 rounded-[28px] border border-gray-100 font-black text-[10px] uppercase tracking-widest hover:bg-gray-50 transition-all active:scale-95 shadow-sm">
+            <button className="flex items-center justify-center gap-3 py-4 rounded-[28px] border border-gray-100 font-black text-[10px] uppercase tracking-widest hover:bg-gray-50 transition-all active:scale-95 shadow-sm">
                 <Chrome size={20} />
                 Google
             </button>
-            <button className="flex items-center justify-center gap-3 py-5 rounded-[28px] border border-gray-100 font-black text-[10px] uppercase tracking-widest hover:bg-gray-50 transition-all active:scale-95 shadow-sm">
+            <button className="flex items-center justify-center gap-3 py-4 rounded-[28px] border border-gray-100 font-black text-[10px] uppercase tracking-widest hover:bg-gray-50 transition-all active:scale-95 shadow-sm">
                 <Apple size={20} />
                 Apple
             </button>
         </div>
       </div>
 
-      <div className="mt-12 text-center">
+      <div className="mt-6 text-center">
         <button 
           onClick={onGuest}
           className="text-[10px] font-black text-gray-400 uppercase tracking-[0.2em] hover:text-[#007d34] transition-colors active:scale-90"
