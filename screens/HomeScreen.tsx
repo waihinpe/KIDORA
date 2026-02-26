@@ -5,22 +5,16 @@ import { MOCK_PRODUCTS, PRIMARY_COLOR } from '../constants';
 import { Product, User } from '../types';
 import { repairBrokenImage } from '../services/geminiService';
 
-export const KidoraLogo = ({ size = 40, showText = false, className = "" }: { size?: number, showText?: boolean, className?: string }) => (
+export const KidoraLogo = ({ size = 100, showText = false, className = "" }: { size?: number, showText?: boolean, className?: string }) => (
   <div className={`flex flex-col items-center justify-center ${className}`}>
-    <svg width={size} height={size} viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
-      <g transform="rotate(0 50 50)">
-        <path d="M55 25C65 25 75 35 75 45" stroke="#f58220" strokeWidth="8" strokeLinecap="round" />
-        <path d="M55 25C50 25 45 30 43 35M47 32C42 32 37 37 35 42M51 28C46 28 41 33 39 38M59 28C59 23 54 18 49 18" stroke="#f58220" strokeWidth="4" strokeLinecap="round" />
-      </g>
-      <g transform="rotate(120 50 50)">
-        <path d="M55 25C65 25 75 35 75 45" stroke="#00aeef" strokeWidth="8" strokeLinecap="round" />
-        <path d="M55 25C50 25 45 30 43 35M47 32C42 32 37 37 35 42M51 28C46 28 41 33 39 38M59 28C59 23 54 18 49 18" stroke="#00aeef" strokeWidth="4" strokeLinecap="round" />
-      </g>
-      <g transform="rotate(240 50 50)">
-        <path d="M55 25C65 25 75 35 75 45" stroke="#007d34" strokeWidth="8" strokeLinecap="round" />
-        <path d="M55 25C50 25 45 30 43 35M47 32C42 32 37 37 35 42M51 28C46 28 41 33 39 38M59 28C59 23 54 18 49 18" stroke="#007d34" strokeWidth="4" strokeLinecap="round" />
-      </g>
-    </svg>
+    <img 
+      src="/assets/kidora-logo.png" 
+      alt="KIDORA Logo" 
+      width={size} 
+      height={size} 
+      className="object-contain"
+      style={{ width: size, height: size }}
+    />
     {showText && <span className="text-[#007d34] font-black text-xl uppercase tracking-widest mt-2">KIDORA</span>}
   </div>
 );

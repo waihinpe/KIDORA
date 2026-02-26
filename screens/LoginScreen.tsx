@@ -28,11 +28,11 @@ const LoginScreen: React.FC<LoginScreenProps> = ({ onLogin, onGuest }) => {
       <div className="flex-1 flex flex-col justify-center">
         {/* Branding */}
         <div className="text-center mb-12">
-          <div className="mb-6 flex justify-center">
-            <KidoraLogo size={80} />
+          <div className="mb-0 flex justify-center">
+            <KidoraLogo size={100} />
           </div>
-          <h1 className="text-4xl font-black text-[#007d34] tracking-tighter mb-2">KIDORA</h1>
-          <p className="text-sm text-gray-400 font-bold uppercase tracking-widest px-4">
+          <h1 className="text-3xl font-black text-[#007d34] tracking-tighter mb-2">KIDORA</h1>
+          <p className="text-xs text-gray-400 font-bold uppercase tracking-widest px-4">
             Smart Savings • Green Parenting
           </p>
         </div>
