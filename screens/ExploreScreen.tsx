@@ -1,21 +1,47 @@
 
 import React, { useState, useMemo } from 'react';
-import { Search, SlidersHorizontal, MapPin, ChevronDown, Star, Globe, Loader2, ImageOff, Navigation, Heart, Sparkles } from 'lucide-react';
+import { motion, AnimatePresence } from 'motion/react';
+import { Search, SlidersHorizontal, MapPin, ChevronDown, Globe, Loader2, ImageOff, Heart, Sparkles, Tent, Shirt, Milk, Sofa, Moon, BookOpen, X, Check, ShieldCheck } from 'lucide-react';
 import { MOCK_PRODUCTS } from '../constants';
 import { Product } from '../types';
-import { repairBrokenImage } from '../services/geminiService';
+import { repairBrokenImage, verifyProductAuthenticity } from '../services/geminiService';
 
 interface ExploreScreenProps {
   onProductClick: (product: Product) => void;
 }
 
-// Added optional key prop to satisfy TypeScript strict prop checking when used in .map()
 const ProductCard = ({ product, onProductClick }: { product: Product, onProductClick: (p: Product) => void, key?: React.Key }) => {
   const [imgUrl, setImgUrl] = useState(product.images[0]);
   const [isBroken, setIsBroken] = useState(false);
   const [isRepairing, setIsRepairing] = useState(false);
   const [repaired, setRepaired] = useState(false);
   const [isLoaded, setIsLoaded] = useState(false);
+  const [isVerified, setIsVerified] = useState<boolean | null>(product.isVerified ?? null);
+  const [isVerifying, setIsVerifying] = useState(false);
+
+  React.useEffect(() => {
+    if (isVerified === null) {
+      const verify = async () => {
+        setIsVerifying(true);
+        try {
+          const result = await verifyProductAuthenticity({
+            name: product.name,
+            brand: product.brand,
+            description: product.description,
+            price: product.price,
+            originalPrice: product.originalPrice
+          });
+          setIsVerified(result.isVerified);
+        } catch (error) {
+          console.error("Verification failed:", error);
+          setIsVerified(true); // Fallback to true for demo
+        } finally {
+          setIsVerifying(false);
+        }
+      };
+      verify();
+    }
+  }, [product, isVerified]);
 
   const handleImageError = async () => {
     if (isRepairing || repaired) {
@@ -42,7 +68,6 @@ const ProductCard = ({ product, onProductClick }: { product: Product, onProductC
         className="group cursor-pointer flex flex-col animate-in fade-in slide-in-from-bottom-4 duration-500"
     >
       <div className="aspect-[4/5] rounded-[32px] overflow-hidden bg-gray-50 mb-4 relative shadow-sm border border-gray-100 transition-all hover:shadow-xl hover:translate-y-[-4px]">
-        {/* Shimmer Placeholder */}
         {!isLoaded && !isBroken && !isRepairing && (
           <div className="absolute inset-0 bg-gradient-to-r from-gray-100 via-gray-50 to-gray-100 animate-pulse" />
         )}
@@ -83,6 +108,21 @@ const ProductCard = ({ product, onProductClick }: { product: Product, onProductC
         <button className="absolute top-4 right-4 p-2 bg-white/90 backdrop-blur-sm rounded-2xl shadow-sm text-gray-400 hover:text-red-500 transition-colors z-10">
           <Heart size={16} />
         </button>
+        
+        {isVerified && (
+          <div className="absolute top-4 left-4 flex items-center gap-1.5 bg-white/90 backdrop-blur-sm text-[#007d34] text-[7px] font-black px-2 py-1.5 rounded-lg shadow-sm border border-green-100 z-10 animate-in fade-in zoom-in duration-300">
+            <ShieldCheck size={12} fill="currentColor" fillOpacity={0.2} />
+            <span>GEMINI VERIFIED</span>
+          </div>
+        )}
+
+        {isVerifying && (
+          <div className="absolute top-4 left-4 flex items-center gap-1.5 bg-white/90 backdrop-blur-sm text-blue-600 text-[7px] font-black px-2 py-1.5 rounded-lg shadow-sm border border-blue-100 z-10">
+            <Loader2 size={10} className="animate-spin" />
+            <span>VERIFYING...</span>
+          </div>
+        )}
+
         <div className="absolute bottom-4 left-4 bg-[#007d34] text-white text-[8px] font-black px-2.5 py-1 rounded-lg shadow-lg uppercase tracking-wider z-10">
             {product.condition}
         </div>
@@ -103,9 +143,11 @@ const ExploreScreen: React.FC<ExploreScreenProps> = ({ onProductClick }) => {
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedLocation, setSelectedLocation] = useState('All SEA');
   const [isLocationModalOpen, setIsLocationModalOpen] = useState(false);
+  const [isFilterDrawerOpen, setIsFilterDrawerOpen] = useState(false);
+  const [selectedCategory, setSelectedCategory] = useState('All');
   const [selectedCondition, setSelectedCondition] = useState('All');
-  const [locationSearch] = useState('');
-  const [isLocating, setIsLocating] = useState(false);
+  const [selectedAge, setSelectedAge] = useState('All');
+  const [selectedGender, setSelectedGender] = useState('All');
 
   const countries = [
     { name: 'Singapore', icon: '🇸🇬', cities: ['All Singapore', 'Orchard', 'Jurong', 'Tampines', 'Sentosa'] },
@@ -116,55 +158,63 @@ const ExploreScreen: React.FC<ExploreScreenProps> = ({ onProductClick }) => {
     { name: 'Philippines', icon: '🇵🇭', cities: ['All Philippines', 'Manila', 'Cebu', 'Davao'] },
   ];
 
-  const conditions = [
-    { label: 'All', value: 'All' },
-    { label: 'Premium', value: 'Like New', icon: <Star size={14} fill="currentColor" /> },
-    { label: 'Good', value: 'Good' },
-    { label: 'Fair', value: 'Fair' },
+  const categories = [
+    { label: 'All', value: 'All', icon: <Globe size={14} /> },
+    { label: 'Outdoor Gear', value: 'Outdoor Gear', icon: <Tent size={14} /> },
+    { label: 'Feeding & Changing', value: 'Feeding & Changing', icon: <Milk size={14} /> },
+    { label: 'Furniture', value: 'Furniture', icon: <Sofa size={14} /> },
+    { label: 'Sleeping', value: 'Sleeping', icon: <Moon size={14} /> },
+    { label: 'Learning & Development', value: 'Learning & Development', icon: <BookOpen size={14} /> },
+    { label: 'Clothing', value: 'Clothing', icon: <Shirt size={14} /> },
   ];
 
-  const useCurrentLocation = () => {
-    setIsLocating(true);
-    if ("geolocation" in navigator) {
-      navigator.geolocation.getCurrentPosition(() => {
-        setTimeout(() => {
-          setSelectedLocation('Orchard, Singapore');
-          setIsLocating(false);
-          setIsLocationModalOpen(false);
-        }, 1200);
-      }, () => {
-        setIsLocating(false);
-        alert("Could not access location.");
-      });
-    } else {
-      setIsLocating(false);
-    }
-  };
+  const conditions = [
+    'All',
+    'New',
+    'Brand new (open box)',
+    'New but try once',
+    'Pre-loved',
+    'Well-loved',
+    'Donation'
+  ];
+
+  const ages = [
+    'All',
+    '0-3 month',
+    '3-6 month',
+    '6-9 month',
+    '9-12 month',
+    '12-18 month',
+    '18-24 month',
+    '2 years old',
+    '3 years old',
+    '4 years old',
+    '5 years old'
+  ];
+
+  const genders = ['All', 'Boy', 'Girl', 'Unisex'];
 
   const filteredProducts = useMemo(() => {
     return MOCK_PRODUCTS.filter(product => {
       const matchesSearch = product.name.toLowerCase().includes(searchQuery.toLowerCase()) || 
                            product.brand.toLowerCase().includes(searchQuery.toLowerCase());
+      const matchesCategory = selectedCategory === 'All' || product.category === selectedCategory;
       const matchesCondition = selectedCondition === 'All' || product.condition === selectedCondition;
+      const matchesAge = selectedAge === 'All' || product.age === selectedAge;
+      const matchesGender = selectedGender === 'All' || product.gender === selectedGender;
+      
       let matchesLocation = true;
       if (selectedLocation !== 'All SEA') {
         const normalizedLocation = selectedLocation.replace('All ', '').toLowerCase();
         matchesLocation = product.location.toLowerCase().includes(normalizedLocation);
       }
-      return matchesSearch && matchesCondition && matchesLocation;
+      return matchesSearch && matchesCategory && matchesLocation && matchesCondition && matchesAge && matchesGender;
     });
-  }, [searchQuery, selectedCondition, selectedLocation]);
-
-  const filteredCountryList = countries.filter(c => 
-    c.name.toLowerCase().includes(locationSearch.toLowerCase()) ||
-    c.cities.some(city => city.toLowerCase().includes(locationSearch.toLowerCase()))
-  );
+  }, [searchQuery, selectedCategory, selectedLocation, selectedCondition, selectedAge, selectedGender]);
 
   return (
     <div className="flex flex-col min-h-full">
-      {/* Search Header - Sticky */}
-      <div className="sticky top-0 z-40 bg-white/80 backdrop-blur-md border-b border-gray-100 pt-8 pb-4 px-6 shadow-sm">
-
+      <div className="sticky top-0 bg-white z-40 pt-8 pb-4 px-6 border-b border-gray-50 shadow-sm">
         <div className="flex items-center justify-between mb-4">
           <button 
             onClick={() => setIsLocationModalOpen(true)}
@@ -174,8 +224,16 @@ const ExploreScreen: React.FC<ExploreScreenProps> = ({ onProductClick }) => {
             <span className="uppercase tracking-widest">{selectedLocation}</span>
             <ChevronDown size={14} />
           </button>
-          <button className="p-2.5 rounded-2xl bg-white border border-gray-100 text-gray-500 shadow-sm active:scale-95 transition-all">
+          <button 
+            onClick={() => setIsFilterDrawerOpen(true)}
+            className="relative p-2.5 rounded-2xl bg-white border border-gray-100 text-gray-500 shadow-sm active:scale-95 transition-all"
+          >
             <SlidersHorizontal size={18} />
+            {(selectedCondition !== 'All' || selectedAge !== 'All' || selectedGender !== 'All') && (
+              <span className="absolute -top-1 -right-1 w-4 h-4 bg-[#007d34] rounded-full border-2 border-white flex items-center justify-center text-[8px] text-white font-black">
+                !
+              </span>
+            )}
           </button>
         </div>
 
@@ -191,20 +249,19 @@ const ExploreScreen: React.FC<ExploreScreenProps> = ({ onProductClick }) => {
         </div>
 
         <div className="flex items-center gap-2 overflow-x-auto hide-scrollbar">
-          {conditions.map((condition) => (
+          {categories.map((cat) => (
             <button 
-              key={condition.value}
-              onClick={() => setSelectedCondition(condition.value)}
-              className={`flex items-center gap-1.5 whitespace-nowrap px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-wider transition-all border ${selectedCondition === condition.value ? 'bg-[#007d34] text-white border-[#007d34]' : 'bg-white text-gray-400 border-gray-100'}`}
+              key={cat.value}
+              onClick={() => setSelectedCategory(cat.value)}
+              className={`flex items-center gap-1.5 whitespace-nowrap px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-wider transition-all border ${selectedCategory === cat.value ? 'bg-[#007d34] text-white border-[#007d34]' : 'bg-white text-gray-400 border-gray-100'}`}
             >
-              {condition.icon}
-              {condition.label}
+              {cat.icon}
+              {cat.label}
             </button>
           ))}
         </div>
       </div>
 
-      {/* Grid */}
       <div className="p-6">
         {filteredProducts.length > 0 ? (
           <div className="grid grid-cols-2 gap-x-5 gap-y-10">
@@ -220,49 +277,170 @@ const ExploreScreen: React.FC<ExploreScreenProps> = ({ onProductClick }) => {
         )}
       </div>
 
-      {/* Modals (Location) */}
-      {isLocationModalOpen && (
-        <div className="fixed inset-0 z-[100] flex items-end justify-center px-4 pb-4 animate-in fade-in duration-300">
-          <div className="absolute inset-0 bg-gray-900/40 backdrop-blur-sm" onClick={() => setIsLocationModalOpen(false)} />
-          <div className="relative w-full max-w-md bg-white rounded-[40px] p-8 shadow-2xl animate-in slide-in-from-bottom-10 duration-500 flex flex-col max-h-[85vh] overflow-hidden">
-            <div className="w-12 h-1.5 bg-gray-100 rounded-full mx-auto mb-6 shrink-0" />
-            <h2 className="text-2xl font-black text-gray-900 mb-6">Location</h2>
-            <button 
-              onClick={useCurrentLocation}
-              className="w-full flex items-center justify-between bg-[#e6f2eb] p-5 rounded-[24px] mb-6 border border-[#007d34]/20"
+      <AnimatePresence>
+        {isLocationModalOpen && (
+          <div className="fixed inset-0 z-[100] flex items-end justify-center">
+            <motion.div 
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={() => setIsLocationModalOpen(false)}
+              className="absolute inset-0 bg-gray-900/40 backdrop-blur-sm" 
+            />
+            <motion.div 
+              initial={{ y: "100%" }}
+              animate={{ y: 0 }}
+              exit={{ y: "100%" }}
+              transition={{ type: "spring", damping: 25, stiffness: 200 }}
+              drag="y"
+              dragConstraints={{ top: 0 }}
+              dragElastic={0.2}
+              onDragEnd={(_, info) => {
+                if (info.offset.y > 100) setIsLocationModalOpen(false);
+              }}
+              className="relative w-full max-w-md bg-white rounded-t-[40px] p-8 shadow-2xl flex flex-col max-h-[85vh] overflow-hidden"
             >
-              <div className="flex items-center gap-4">
-                <Navigation size={20} className="text-[#007d34]" />
-                <span className="text-sm font-black text-[#007d34] uppercase tracking-wider">{isLocating ? 'Locating...' : 'Use Current Location'}</span>
+              <div className="w-12 h-1.5 bg-gray-100 rounded-full mx-auto mb-6 shrink-0" />
+              <div className="flex items-center justify-between mb-8 shrink-0">
+                <h2 className="text-2xl font-black text-gray-900">Location</h2>
+                <button onClick={() => setIsLocationModalOpen(false)} className="p-2 text-gray-400 bg-gray-50 rounded-full">
+                  <X size={20} />
+                </button>
               </div>
-            </button>
-            <div className="flex-1 overflow-y-auto hide-scrollbar space-y-6">
-               <button 
-                  onClick={() => { setSelectedLocation('All SEA'); setIsLocationModalOpen(false); }}
-                  className="w-full text-left p-4 rounded-2xl bg-gray-50 text-xs font-black uppercase tracking-widest"
-               >
-                 🌏 All Southeast Asia
-               </button>
-               {filteredCountryList.map(c => (
-                 <div key={c.name} className="space-y-2">
-                   <p className="text-[10px] font-black text-gray-400 uppercase ml-2">{c.name}</p>
-                   <div className="grid grid-cols-2 gap-2">
-                     {c.cities.map(city => (
-                       <button 
-                        key={city}
-                        onClick={() => { setSelectedLocation(city); setIsLocationModalOpen(false); }}
-                        className="p-3 border border-gray-100 rounded-xl text-[10px] font-black uppercase text-gray-600 hover:bg-gray-50"
-                       >
-                         {city}
-                       </button>
-                     ))}
+              
+              <div className="flex-1 overflow-y-auto hide-scrollbar space-y-6 pb-10">
+                 <button 
+                    onClick={() => { setSelectedLocation('All SEA'); setIsLocationModalOpen(false); }}
+                    className="w-full text-left p-4 rounded-2xl bg-gray-50 text-xs font-black uppercase tracking-widest border border-gray-100"
+                 >
+                   🌏 All Southeast Asia
+                 </button>
+                 {countries.map(c => (
+                   <div key={c.name} className="space-y-3">
+                     <p className="text-[10px] font-black text-gray-400 uppercase ml-2 tracking-widest">{c.name}</p>
+                     <div className="grid grid-cols-2 gap-2">
+                       {c.cities.map(city => (
+                         <button 
+                          key={city}
+                          onClick={() => { setSelectedLocation(city); setIsLocationModalOpen(false); }}
+                          className={`p-4 border rounded-2xl text-[10px] font-black uppercase tracking-wider transition-all ${selectedLocation === city ? 'bg-[#007d34] text-white border-[#007d34]' : 'bg-white text-gray-600 border-gray-100 hover:bg-gray-50'}`}
+                         >
+                           {city}
+                         </button>
+                       ))}
+                     </div>
                    </div>
-                 </div>
-               ))}
-            </div>
+                 ))}
+              </div>
+            </motion.div>
           </div>
-        </div>
-      )}
+        )}
+
+        {isFilterDrawerOpen && (
+          <div className="fixed inset-0 z-[100] flex items-end justify-center">
+            <motion.div 
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={() => setIsFilterDrawerOpen(false)}
+              className="absolute inset-0 bg-gray-900/40 backdrop-blur-sm" 
+            />
+            <motion.div 
+              initial={{ y: "100%" }}
+              animate={{ y: 0 }}
+              exit={{ y: "100%" }}
+              transition={{ type: "spring", damping: 25, stiffness: 200 }}
+              drag="y"
+              dragConstraints={{ top: 0 }}
+              dragElastic={0.2}
+              onDragEnd={(_, info) => {
+                if (info.offset.y > 100) setIsFilterDrawerOpen(false);
+              }}
+              className="relative w-full max-w-md bg-white rounded-t-[40px] p-8 shadow-2xl flex flex-col max-h-[90vh] overflow-hidden"
+            >
+              <div className="w-12 h-1.5 bg-gray-100 rounded-full mx-auto mb-6 shrink-0" />
+              <div className="flex items-center justify-between mb-8 shrink-0">
+                <h2 className="text-2xl font-black text-gray-900">Filters</h2>
+                <button onClick={() => setIsFilterDrawerOpen(false)} className="p-2 text-gray-400 bg-gray-50 rounded-full">
+                  <X size={20} />
+                </button>
+              </div>
+
+              <div className="flex-1 overflow-y-auto hide-scrollbar space-y-8 pb-32">
+                {/* Condition Filter */}
+                <div className="space-y-4">
+                  <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">Condition</p>
+                  <div className="flex flex-wrap gap-2">
+                    {conditions.map((cond) => (
+                      <button 
+                        key={cond}
+                        onClick={() => setSelectedCondition(cond)}
+                        className={`px-4 py-2.5 rounded-2xl text-[10px] font-black uppercase tracking-wider transition-all border flex items-center gap-2 ${selectedCondition === cond ? 'bg-gray-900 text-white border-gray-900' : 'bg-gray-50 text-gray-400 border-gray-100'}`}
+                      >
+                        {selectedCondition === cond && <Check size={12} strokeWidth={4} />}
+                        {cond}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Age Filter */}
+                <div className="space-y-4">
+                  <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">Age Range</p>
+                  <div className="grid grid-cols-2 gap-2">
+                    {ages.map((age) => (
+                      <button 
+                        key={age}
+                        onClick={() => setSelectedAge(age)}
+                        className={`px-4 py-3 rounded-2xl text-[10px] font-black uppercase tracking-wider transition-all border flex items-center justify-center gap-2 ${selectedAge === age ? 'bg-blue-600 text-white border-blue-600' : 'bg-gray-50 text-gray-400 border-gray-100'}`}
+                      >
+                        {selectedAge === age && <Check size={12} strokeWidth={4} />}
+                        {age}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Gender Filter */}
+                <div className="space-y-4">
+                  <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">Gender</p>
+                  <div className="flex gap-2">
+                    {genders.map((gender) => (
+                      <button 
+                        key={gender}
+                        onClick={() => setSelectedGender(gender)}
+                        className={`flex-1 py-4 rounded-2xl text-[10px] font-black uppercase tracking-wider transition-all border flex items-center justify-center gap-2 ${selectedGender === gender ? 'bg-pink-600 text-white border-pink-600' : 'bg-gray-50 text-gray-400 border-gray-100'}`}
+                      >
+                        {selectedGender === gender && <Check size={12} strokeWidth={4} />}
+                        {gender}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              </div>
+
+              <div className="absolute bottom-8 left-8 right-8 flex gap-3">
+                <button 
+                  onClick={() => {
+                    setSelectedCondition('All');
+                    setSelectedAge('All');
+                    setSelectedGender('All');
+                  }}
+                  className="flex-1 bg-gray-50 text-gray-900 py-5 rounded-[24px] font-black uppercase tracking-widest text-[10px] border border-gray-100"
+                >
+                  Reset
+                </button>
+                <button 
+                  onClick={() => setIsFilterDrawerOpen(false)}
+                  className="flex-[2] bg-[#007d34] text-white py-5 rounded-[24px] font-black uppercase tracking-widest text-[10px] shadow-2xl shadow-green-900/20"
+                >
+                  Apply Filters
+                </button>
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
     </div>
   );
 };

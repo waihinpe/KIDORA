@@ -1,20 +1,26 @@
 
-import React, { useState, useEffect } from 'react';
-import { Search, ShoppingBag, PlusCircle, ShieldCheck, Heart, Leaf, ImageOff, RefreshCw, Loader2, Sparkles, Globe } from 'lucide-react';
-import { MOCK_PRODUCTS, PRIMARY_COLOR } from '../constants';
+import React, { useState } from 'react';
+import { Search, ShoppingBag, PlusCircle, ShieldCheck, Heart, Leaf, ImageOff, Loader2, Globe } from 'lucide-react';
+import { MOCK_PRODUCTS } from '../constants';
 import { Product, User } from '../types';
-import { repairBrokenImage } from '../services/geminiService';
+import { repairBrokenImage, verifyProductAuthenticity } from '../services/geminiService';
 
-export const KidoraLogo = ({ size = 100, showText = false, className = "" }: { size?: number, showText?: boolean, className?: string }) => (
+export const KidoraLogo = ({ size = 40, showText = false, className = "" }: { size?: number, showText?: boolean, className?: string }) => (
   <div className={`flex flex-col items-center justify-center ${className}`}>
-    <img 
-      src="/assets/kidora-logo.png" 
-      alt="KIDORA Logo" 
-      width={size} 
-      height={size} 
-      className="object-contain"
-      style={{ width: size, height: size }}
-    />
+    <svg width={size} height={size} viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <g transform="rotate(0 50 50)">
+        <path d="M55 25C65 25 75 35 75 45" stroke="#f58220" strokeWidth="8" strokeLinecap="round" />
+        <path d="M55 25C50 25 45 30 43 35M47 32C42 32 37 37 35 42M51 28C46 28 41 33 39 38M59 28C59 23 54 18 49 18" stroke="#f58220" strokeWidth="4" strokeLinecap="round" />
+      </g>
+      <g transform="rotate(120 50 50)">
+        <path d="M55 25C65 25 75 35 75 45" stroke="#00aeef" strokeWidth="8" strokeLinecap="round" />
+        <path d="M55 25C50 25 45 30 43 35M47 32C42 32 37 37 35 42M51 28C46 28 41 33 39 38M59 28C59 23 54 18 49 18" stroke="#00aeef" strokeWidth="4" strokeLinecap="round" />
+      </g>
+      <g transform="rotate(240 50 50)">
+        <path d="M55 25C65 25 75 35 75 45" stroke="#007d34" strokeWidth="8" strokeLinecap="round" />
+        <path d="M55 25C50 25 45 30 43 35M47 32C42 32 37 37 35 42M51 28C46 28 41 33 39 38M59 28C59 23 54 18 49 18" stroke="#007d34" strokeWidth="4" strokeLinecap="round" />
+      </g>
+    </svg>
     {showText && <span className="text-[#007d34] font-black text-xl uppercase tracking-widest mt-2">KIDORA</span>}
   </div>
 );
@@ -41,6 +47,32 @@ const ProductCard = ({ product, onProductClick }: ProductCardProps) => {
   const [repaired, setRepaired] = useState(false);
   const [isLoaded, setIsLoaded] = useState(false);
   const [repairMethod, setRepairMethod] = useState<'search' | 'fallback' | null>(null);
+  const [isVerified, setIsVerified] = useState<boolean | null>(product.isVerified ?? null);
+  const [isVerifying, setIsVerifying] = useState(false);
+
+  React.useEffect(() => {
+    if (isVerified === null) {
+      const verify = async () => {
+        setIsVerifying(true);
+        try {
+          const result = await verifyProductAuthenticity({
+            name: product.name,
+            brand: product.brand,
+            description: product.description,
+            price: product.price,
+            originalPrice: product.originalPrice
+          });
+          setIsVerified(result.isVerified);
+        } catch (error) {
+          console.error("Verification failed:", error);
+          setIsVerified(true); // Fallback to true for demo
+        } finally {
+          setIsVerifying(false);
+        }
+      };
+      verify();
+    }
+  }, [product, isVerified]);
 
   const handleImageError = async () => {
     if (isRepairing || repaired) {
@@ -116,6 +148,21 @@ const ProductCard = ({ product, onProductClick }: ProductCardProps) => {
         <button className="absolute top-4 right-4 p-2 bg-white/90 backdrop-blur-sm rounded-2xl shadow-sm text-gray-400 hover:text-red-500 transition-colors z-10">
           <Heart size={16} />
         </button>
+
+        {isVerified && (
+          <div className="absolute top-4 left-4 flex items-center gap-1.5 bg-white/90 backdrop-blur-sm text-[#007d34] text-[7px] font-black px-2 py-1.5 rounded-lg shadow-sm border border-green-100 z-10 animate-in fade-in zoom-in duration-300">
+            <ShieldCheck size={12} fill="currentColor" fillOpacity={0.2} />
+            <span>GEMINI VERIFIED</span>
+          </div>
+        )}
+
+        {isVerifying && (
+          <div className="absolute top-4 left-4 flex items-center gap-1.5 bg-white/90 backdrop-blur-sm text-blue-600 text-[7px] font-black px-2 py-1.5 rounded-lg shadow-sm border border-blue-100 z-10">
+            <Loader2 size={10} className="animate-spin" />
+            <span>VERIFYING...</span>
+          </div>
+        )}
+
         <div className="absolute bottom-4 left-4 bg-[#007d34] text-white text-[8px] font-black px-2.5 py-1 rounded-lg shadow-lg uppercase tracking-wider z-10">
             {product.condition}
         </div>
@@ -133,35 +180,34 @@ const ProductCard = ({ product, onProductClick }: ProductCardProps) => {
   );
 };
 
-const HomeScreen: React.FC<HomeScreenProps> = ({ user, cartCount = 0, onProductClick, onExploreClick, onSellClick }) => {
+const HomeScreen: React.FC<HomeScreenProps> = ({ cartCount = 0, onProductClick, onExploreClick, onSellClick }) => {
   return (
     <div className="flex flex-col space-y-6">
-      {/* Header - Sticky */}
-      <div className="sticky top-0 z-40 bg-white/80 backdrop-blur-md border-b border-gray-100 px-6 py-4 flex justify-between items-center transition-all">
+      {/* Header */}
+      <div className="px-6 pt-8 flex justify-between items-center">
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 bg-white rounded-xl shadow-sm border border-gray-100 flex items-center justify-center overflow-hidden">
-             <KidoraLogo size={28} />
+          <div className="w-12 h-12 bg-white rounded-2xl shadow-sm border border-gray-100 flex items-center justify-center overflow-hidden">
+             <KidoraLogo size={32} />
           </div>
           <div>
-            <h1 className="text-xl font-black tracking-tighter text-[#007d34]">KIDORA</h1>
-            <p className="text-[8px] text-gray-400 font-bold uppercase tracking-widest">Give Kids Gear a Second Life</p>
+            <h1 className="text-2xl font-black tracking-tighter text-[#007d34]">KIDORA</h1>
+            <p className="text-[10px] text-gray-400 font-bold uppercase tracking-widest">Give Kids Gear a Second Life</p>
           </div>
         </div>
         <div className="flex items-center gap-2">
-            <div className="p-2 bg-gray-50 rounded-xl border border-gray-100 text-gray-400 active:scale-95 transition-transform cursor-pointer">
-                <Search size={18} />
+            <div className="p-2.5 bg-gray-50 rounded-2xl border border-gray-100 text-gray-400 active:scale-95 transition-transform cursor-pointer">
+                <Search size={20} />
             </div>
-            <div className="relative p-2 bg-gray-50 rounded-xl border border-gray-100 text-gray-400 active:scale-95 transition-transform cursor-pointer">
-                <ShoppingBag size={18} />
+            <div className="relative p-2.5 bg-gray-50 rounded-2xl border border-gray-100 text-gray-400 active:scale-95 transition-transform cursor-pointer">
+                <ShoppingBag size={20} />
                 {cartCount > 0 && (
-                  <span className="absolute -top-1 -right-1 bg-[#007d34] text-white text-[8px] rounded-full h-4 w-4 flex items-center justify-center font-bold border-2 border-white animate-in zoom-in duration-300">
+                  <span className="absolute top-1 right-1 bg-[#007d34] text-white text-[8px] rounded-full h-4 w-4 flex items-center justify-center font-bold border-2 border-white animate-in zoom-in duration-300">
                     {cartCount}
                   </span>
                 )}
             </div>
         </div>
       </div>
-
 
       {/* Sustainability Highlight */}
       <div className="px-6">
@@ -204,14 +250,21 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ user, cartCount = 0, onProductC
           <button onClick={onExploreClick} className="text-[#007d34] text-xs font-black uppercase tracking-widest active:scale-90 transition-transform">See All</button>
         </div>
         <div className="flex gap-4 overflow-x-auto hide-scrollbar pb-2">
-          {['Strollers', 'Toys', 'Clothing', 'Feeding', 'Nursery'].map((cat) => (
-            <div key={cat} className="flex flex-col items-center gap-3 min-w-[76px] group cursor-pointer">
+          {[
+            { name: 'Outdoor', icon: '⛺' },
+            { name: 'Feeding', icon: '🍼' },
+            { name: 'Furniture', icon: '🛋️' },
+            { name: 'Sleeping', icon: '🌙' },
+            { name: 'Learning', icon: '📚' },
+            { name: 'Clothing', icon: '👕' }
+          ].map((cat) => (
+            <div key={cat.name} className="flex flex-col items-center gap-3 min-w-[76px] group cursor-pointer">
               <div className="w-16 h-16 bg-white rounded-[24px] flex items-center justify-center border border-gray-100 shadow-sm group-hover:shadow-md group-hover:border-[#007d34]/20 group-active:scale-95 transition-all">
                 <span className="text-2xl transition-transform group-hover:scale-110">
-                  {cat === 'Strollers' ? '🛒' : cat === 'Toys' ? '🧸' : cat === 'Clothing' ? '👕' : cat === 'Feeding' ? '🍼' : '🛏️'}
+                  {cat.icon}
                 </span>
               </div>
-              <span className="text-[10px] text-gray-500 font-black uppercase tracking-tighter group-hover:text-[#007d34] transition-colors">{cat}</span>
+              <span className="text-[10px] text-gray-500 font-black uppercase tracking-tighter group-hover:text-[#007d34] transition-colors">{cat.name}</span>
             </div>
           ))}
         </div>

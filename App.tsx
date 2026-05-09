@@ -1,6 +1,6 @@
 
-import React, { useState, useEffect } from 'react';
-import { Screen, Product, NewListing, User } from './types';
+import React, { useState } from 'react';
+import { Screen, Product, User, TransactionType } from './types';
 import Layout from './components/Layout';
 import HomeScreen from './screens/HomeScreen';
 import ExploreScreen from './screens/ExploreScreen';
@@ -11,51 +11,39 @@ import SellWizardScreen from './screens/SellWizardScreen';
 import LoginScreen from './screens/LoginScreen';
 import OnboardingScreen from './screens/OnboardingScreen';
 import CheckoutScreen from './screens/CheckoutScreen';
+import CountrySelectionScreen from './screens/CountrySelectionScreen';
 
 const App: React.FC = () => {
-  const [currentScreen, setCurrentScreen] = useState<Screen>(Screen.LOGIN);
-
-
-  const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
-  const [user, setUser] = useState<User | null>(null);
-  const [isInitializing, setIsInitializing] = useState(true);
-
-  const [cartCount, setCartCount] = useState(0);
-
-  // Persistence check for User and Onboarding status
-  useEffect(() => {
+  const [user, setUser] = useState<User | null>(() => {
     const savedUser = localStorage.getItem('kidora_user');
-    const onboardingComplete = localStorage.getItem('kidora_onboarding_complete');
-    const savedCart = localStorage.getItem('kidora_cart_count');
-    
     if (savedUser) {
       try {
-        setUser(JSON.parse(savedUser));
+        return JSON.parse(savedUser);
       } catch (e) {
         console.error("Auth restore error:", e);
       }
     }
+    return null;
+  });
 
-    if (savedCart) {
-      setCartCount(parseInt(savedCart, 10));
+  const [currentScreen, setCurrentScreen] = useState<Screen>(() => {
+    const savedUser = localStorage.getItem('kidora_user');
+    const savedCountry = localStorage.getItem('kidora_country');
+    if (savedUser) {
+      return savedCountry ? Screen.HOME : Screen.COUNTRY_SELECTION;
     }
+    return Screen.LOGIN;
+  });
 
-    if (onboardingComplete === 'true') {
-      setCurrentScreen(Screen.HOME);
-    } else {
-      setCurrentScreen(Screen.ONBOARDING);
-    }
-    
-    setIsInitializing(false);
-  }, []);
-
-  const handleOnboardingComplete = () => {
-    localStorage.setItem('kidora_onboarding_complete', 'true');
-    setCurrentScreen(Screen.HOME);
-  };
-
-
-
+  const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
+  const [, setCountry] = useState<string | null>(() => localStorage.getItem('kidora_country'));
+  const [cartCount, setCartCount] = useState(() => {
+    const savedCart = localStorage.getItem('kidora_cart_count');
+    return savedCart ? parseInt(savedCart, 10) : 0;
+  });
+  
+  const [transactionType, setTransactionType] = useState<TransactionType>('buy');
+  const [inspectionSelected, setInspectionSelected] = useState(false);
 
   const handleLogin = (email: string) => {
     const mockUser: User = {
@@ -69,12 +57,27 @@ const App: React.FC = () => {
     };
     setUser(mockUser);
     localStorage.setItem('kidora_user', JSON.stringify(mockUser));
+    
+    const savedCountry = localStorage.getItem('kidora_country');
+    if (savedCountry) {
+      setCountry(savedCountry);
+      setCurrentScreen(Screen.HOME);
+    } else {
+      setCurrentScreen(Screen.COUNTRY_SELECTION);
+    }
+  };
+
+  const handleCountrySelect = (selectedCountry: string) => {
+    setCountry(selectedCountry);
+    localStorage.setItem('kidora_country', selectedCountry);
     setCurrentScreen(Screen.HOME);
   };
 
   const handleLogout = () => {
     setUser(null);
+    setCountry(null);
     localStorage.removeItem('kidora_user');
+    localStorage.removeItem('kidora_country');
     setCurrentScreen(Screen.LOGIN);
   };
 
@@ -83,8 +86,7 @@ const App: React.FC = () => {
     setCurrentScreen(Screen.PRODUCT_DETAIL);
   };
 
-  const handlePublish = (listing: NewListing) => {
-    console.log('Publishing listing:', listing);
+  const handlePublish = () => {
     setCurrentScreen(Screen.PROFILE);
   };
 
@@ -111,12 +113,20 @@ const App: React.FC = () => {
     setSelectedProduct(null);
   };
 
-  const renderScreen = () => {
-    if (isInitializing) return <div className="h-full w-full bg-white animate-pulse" />;
+  const proceedToCheckout = (type: TransactionType, inspection: boolean) => {
+    if (!user) {
+      setCurrentScreen(Screen.LOGIN);
+      return;
+    }
+    setTransactionType(type);
+    setInspectionSelected(inspection);
+    setCurrentScreen(Screen.CHECKOUT);
+  };
 
+  const renderScreen = () => {
     switch (currentScreen) {
       case Screen.ONBOARDING:
-        return <OnboardingScreen onComplete={handleOnboardingComplete} />;
+        return <OnboardingScreen onComplete={() => setCurrentScreen(Screen.HOME)} />;
       case Screen.LOGIN:
         return (
           <LoginScreen 
@@ -124,6 +134,8 @@ const App: React.FC = () => {
             onGuest={() => setCurrentScreen(Screen.HOME)} 
           />
         );
+      case Screen.COUNTRY_SELECTION:
+        return <CountrySelectionScreen onSelect={handleCountrySelect} />;
       case Screen.HOME:
         return (
           <HomeScreen 
@@ -163,19 +175,15 @@ const App: React.FC = () => {
               setCurrentScreen(Screen.EXPLORE);
               setSelectedProduct(null);
             }}
-            onBuyNow={() => {
-              if (user) {
-                setCurrentScreen(Screen.CHECKOUT);
-              } else {
-                setCurrentScreen(Screen.LOGIN);
-              }
-            }}
+            onProceedToCheckout={proceedToCheckout}
           />
         ) : null;
       case Screen.CHECKOUT:
         return selectedProduct ? (
           <CheckoutScreen 
             product={selectedProduct}
+            transactionType={transactionType}
+            initialInspection={inspectionSelected}
             onBack={() => setCurrentScreen(Screen.PRODUCT_DETAIL)}
             onOrderComplete={handleOrderComplete}
           />
@@ -193,32 +201,26 @@ const App: React.FC = () => {
     }
   }
 
-  const renderContent = () => {
-    if (isInitializing) return <div className="h-full w-full bg-white animate-pulse" />;
-    
-    // Screens that should not show the main bottom navigation
-    const fullScreenViews = [Screen.LOGIN, Screen.ONBOARDING, Screen.SELL, Screen.PRODUCT_DETAIL, Screen.CHECKOUT];
-    const isFullScreen = fullScreenViews.includes(currentScreen);
+  const fullScreenViews = [Screen.LOGIN, Screen.COUNTRY_SELECTION, Screen.ONBOARDING, Screen.SELL, Screen.PRODUCT_DETAIL, Screen.CHECKOUT];
+  const isFullScreen = fullScreenViews.includes(currentScreen);
 
-    if (isFullScreen) {
-      return renderScreen();
-    }
-
+  if (isFullScreen) {
     return (
-      <Layout activeScreen={currentScreen} setScreen={setCurrentScreen}>
-        {renderScreen()}
-      </Layout>
+      <div className="min-h-screen bg-[#f1f3f5] md:flex md:items-center md:justify-center p-0 md:p-8">
+        <div className="w-full max-w-md bg-white shadow-xl h-screen overflow-hidden relative border-x border-gray-100">
+          {renderScreen()}
+        </div>
+      </div>
     );
-  };
+  }
 
   return (
     <div className="min-h-screen bg-[#f1f3f5] md:flex md:items-center md:justify-center p-0 md:p-8">
-      <div className="w-full max-w-md bg-white shadow-xl h-screen overflow-hidden relative border-x border-gray-100 flex flex-col">
-        {renderContent()}
-      </div>
+      <Layout activeScreen={currentScreen} setScreen={setCurrentScreen}>
+        {renderScreen()}
+      </Layout>
     </div>
   );
 };
-
 
 export default App;
